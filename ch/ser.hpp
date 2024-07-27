@@ -26,9 +26,11 @@ using json = nlohmann::json;
 
 enum {
     STATE_NONE = 0,
-    STATE_REGISTER,
+    STATE_REGISTER1,
+    STATE_REGISTER2,
     STATE_LOG_ON,
-    STATE_FORGET_PASSWORD,
+    STATE_FORGET1,
+    STATE_FORGET2,
     STATE_LOG_OFF,
     STATE_FRIENDS,
     STATE_FRI_CHAT,
@@ -79,7 +81,42 @@ class person{
         sockaddr_in addr;
         int WORKSTATE;
     };
+
 };
+
+struct pregister1{
+    int state;
+    std::string id;
+};
+struct pregister2{
+    int state;
+    std::string id;
+    std::string password;
+    std::string problem;
+    std::string awswer;
+};
+struct logon{
+    int state;
+    std::string id;
+    std::string password;
+};
+struct forget1{
+    int state;
+    std::string id;
+    std::string problem;
+    std::string awswer;
+};
+struct forget2{
+    int state;
+    std::string id;
+    std::string password;
+};
+struct logoff{
+    int state;
+    std::string id;
+    std::string password;
+};
+
 struct pfriend{
     std::string id;
     int co_state;//communication status
