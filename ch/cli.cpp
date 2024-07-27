@@ -22,7 +22,7 @@ void begin(){
         std::string awswer;
         struct pregister1 p1;
         struct pregister2 p2;
-        int state;
+        int state1,state2;
         while(1){
             std::cout << '\n' << "id:";
             std::cin >> id;
@@ -83,6 +83,7 @@ void begin(){
         std::string password1,password2;
         struct forget1 p1;
         struct forget2 p2;
+        int state1,state2;
         while(1){
             std::cout <<"id:";
             std::cin >> id;
@@ -119,6 +120,7 @@ void begin(){
         std::string id;
         std::string password1,password2;
         struct logoff p;
+        int state;
         while (1){
             std::cout <<"id:";
             std::cin >> id;
@@ -144,5 +146,4 @@ void begin(){
                 std::cout << '\n' << "信息错误!" << '\n';
         }
     }
-
 }
