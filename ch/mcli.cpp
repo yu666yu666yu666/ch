@@ -3,7 +3,7 @@
 
 int main() {
 
-    int client_socket = socket(AF_INET, SOCK_STREAM, 0);
+    client_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (client_socket == -1) {
         std::cerr << "Failed to create socket." << std::endl;
         return 1;
@@ -19,7 +19,7 @@ int main() {
         return 1;
     }
     
-    int epoll_fd = epoll_create(6);
+    epoll_fd = epoll_create(6);
     if (epoll_fd == -1) {
         std::cerr << "Failed to create epoll instance." << std::endl;
         return 1;
@@ -32,7 +32,10 @@ int main() {
         std::cerr << "Failed to add socket to epoll instance." << std::endl;
         return 1;
     }
-    begin(client_socket,epoll_fd);
+    //begin1(client_socket,epoll_fd);
+    //begin2(client_socket,epoll_fd);
+    begin1();
+    begin2();
     while (true) {
         struct epoll_event events[1];
         int num_events = epoll_wait(epoll_fd, events, 1, -1);

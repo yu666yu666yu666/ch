@@ -70,7 +70,7 @@ int main() {
                 pid_t child_pid = fork();
                 if (child_pid == 0) {
                     
-                    event.events = EPOLLIN;
+                    event.events = EPOLLIN | EPOLLOUT;
                     event.data.fd = client_socket;
                     if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_socket, &event) == -1) {
                         std::cerr << "Failed to add client socket to epoll instance." << std::endl;

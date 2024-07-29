@@ -24,6 +24,9 @@ using json = nlohmann::json;
 #define IP "209.141.34.136"
 //#define FMT_STAMP "%lld\r\n" // 格式化参数
 
+extern int epoll_fd;
+extern int client_socket;
+
 enum {
     STATE_NONE = 0,
     STATE_REGISTER1,
@@ -32,6 +35,20 @@ enum {
     STATE_FORGET1,
     STATE_FORGET2,
     STATE_LOG_OFF,
+    STATE_FLIST1,
+    STATE_GLIST1,
+    STATE_FADD1,
+    STATE_FDEL1,
+    STATE_FBLOCK1,
+    STATE_FSEARCH1,
+    STATE_FSEARCH2,
+
+
+
+
+
+
+
     STATE_FRIENDS,
     STATE_FRI_CHAT,
     STATE_FRI_FILE,
@@ -55,17 +72,50 @@ enum {
     STATE_GRO_DEL_MA,
     STATE_GRO_EX,
     STATE_GRO_DEL_ME,
+
+   
+    STATE_NOEXIT,
+    STATE_NOFRIEND,
+    STATE_HAVEDONE,
     STATE_YES,
     STATE_NO
 };
 
 void run(int client_socket);
-void fa(int client_socket,std::string json_str);
-std::string shou(int client_socket);
-void mywait(int epoll_fd);
-void begin(int clientsocket,int epollfd);
-
-
+void fa(std::string json_str);
+std::string shou();
+void mywait();
+void begin1();
+void begin2();
+void begin3();
+void begin4();
+void flist();
+void begin5();
+void begin6();
+void glist();
+void begin7();
+void begin8();
+void fchat();
+void fsendfile();
+void fhistory();
+void ffilehistory();
+void fadd();
+void fdel();
+void fblock();
+void fsearch();
+void fapplication();
+void gchat();
+void gsendfile();
+void ghistory();
+void gfilehistory();
+gcreation();
+gdissolution();
+gapplication();
+gexit();
+addmanager();
+delmanager();
+examine();
+delmember();
 
 class personmod{
 
@@ -81,11 +131,12 @@ class person{
         std::string password;
         std::string problem;
         std::string awswer;
-        int state;
+        int ustate;
         std::vector<pfriend> friends;
         std::vector<pgroup> groups;
         sockaddr_in addr;
         int WORKSTATE;
+        std::vector<std::string> applications;
     };
 
 };
@@ -124,7 +175,45 @@ struct logoff{
 };
 struct yesorno{
     int state;
-}
+};
+struct flist1{
+    int state;
+};
+struct glist1{
+    int state;
+};
+struct ffriend{
+    int ustate;
+    std::string id;
+};
+struct fgroup{
+    std::string gid;
+    std::string g_leader;//group leader
+    std::vector<std::string> manager;
+    std::vector<std::string> member;
+};
+struct fadd1{
+    int state;
+    std::string id;
+};
+struct fdel1{
+    int state;
+    std::string id;
+};
+struct fsearch1{
+    int state;
+    std::string id;
+};
+struct fsearch2{
+    int state;
+    int ustate;
+    int co_state;
+};
+
+
+
+
+
 
 struct pfriend{
     std::string id;
@@ -147,6 +236,11 @@ class ghistory{
     chat[];
     fire[];
 };
+
+
+
+
+
 
 class ser{
 

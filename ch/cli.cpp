@@ -1,4 +1,5 @@
 #include "ser.hpp"
+
 template <typename T>
 std::string to_json(const T&obj){
     nlohmann::json j = obj;
@@ -11,14 +12,33 @@ T from_json(const std::string& json_str){
     return j.get<T>();
 }
 
-void fa(int client_socket,std::string json_str){
+template <typename T>
+std::string to__json(const std::vector<T>& data){
+    nlohmann::json jsondata;
+    for(const auto& item : data){
+        jsondata.push_back(item);
+    }
+    return jsondata.dump();
+}
+
+template <typename T>
+std::vector<T> from__json(const std::string& jsonstr){
+    nlohmann::json jsondata = nlohmann::json::parse(jsonstr);
+    std::vector<T> result;
+    for(const auto& item : jsondata){
+        result.emplace_back(item.get<T>());
+    }
+    return result;
+}
+
+void fa(std::string json_str){
     if (write(client_socket, json_str.c_str(), json_str.length()) == -1) {
-        std::cerr << "Failed to write to socket." << std::endl;
+        std::cerr << "Failed to send to socket." << std::endl;
         exit(1);
     }
 }
 
-void mywait(int epoll_fd){
+void mywait(){
     struct epoll_event events[1];
     int num_events = epoll_wait(epoll_fd, events, 1, -1);
     if (num_events == -1) {
@@ -27,19 +47,23 @@ void mywait(int epoll_fd){
     }
 }
 
-std::string shou(int client_socket){
+std::string shou(){
     char buffer[BUFFER_SIZE];
+    std::string json_str;
     ssize_t bytes_read = read(client_socket, buffer, BUFFER_SIZE);
     if (bytes_read == -1) {
         std::cerr << "Failed to read from socket." << std::endl;
         exit(1);
     }
+    json_str+=buffer;
+    return json_str;
 }
 
-void begin(int clientsocket,int epollfd){
+void begin1(){
+//void begin1(int clientsocket,int epollfd){
     std::string option;
-    int client_socket = clientsocket;
-    int epoll_fd = epollfd;
+    //int client_socket = clientsocket;
+    //int epoll_fd = epollfd;
     while(1){
         std::cout << "----------------------" << '\n';
         std::cout << "1.注册" << '\n';
@@ -69,9 +93,9 @@ void begin(int clientsocket,int epollfd){
             std::cin >> id;
             p1 = {STATE_REGISTER1,id};
             json_str = to_json(p1);
-            fa(client_socket,json_str);
-            mywait(epoll_fd);
-            json_str = shou(client_socket);
+            fa(json_str);
+            mywait();
+            json_str = shou();
             t = from_json<yesorno>(json_str);
             if(t.state == STATE_YES)
                 break;
@@ -94,7 +118,7 @@ void begin(int clientsocket,int epollfd){
         std::cin >> awswer;
         p2 = {STATE_REGISTER2,id,password1,problem,awswer};
         json_str = to_json(p2);
-        fa(client_socket,json_str);
+        fa(json_str);
 
     }else if(option == "2"){
         std::string id;
@@ -110,9 +134,9 @@ void begin(int clientsocket,int epollfd){
             std::cin >>password;
             p = {STATE_LOG_ON,id,password};
             json_str = to_json(p);
-            fa(client_socket,json_str);
-            mywait(epoll_fd);
-            json_str = shou(client_socket);
+            fa(json_str);
+            mywait();
+            json_str = shou();
             t = from_json<yesorno>(json_str);
             if(t.state == STATE_YES)
                 break;
@@ -138,9 +162,9 @@ void begin(int clientsocket,int epollfd){
             std::cin >>awswer;
             p1 = {STATE_FORGET1,id,problem,awswer};
             json_str = to_json(p1);
-            fa(client_socket,json_str);
-            mywait(epoll_fd);
-            json_str = shou(client_socket);
+            fa(json_str);
+            mywait();
+            json_str = shou();
             t = from_json<yesorno>(json_str);
             if(t.state  == STATE_YES)
                 break;
@@ -159,7 +183,7 @@ void begin(int clientsocket,int epollfd){
         }
         p2 = {STATE_FORGET2,id,password1};
         json_str = to_json(p2);
-        fa(client_socket,json_str);
+        fa(json_str);
 
     }else{
         std::string id;
@@ -183,9 +207,9 @@ void begin(int clientsocket,int epollfd){
             }
             p = {STATE_LOG_OFF,id, password1};
             json_str = to_json(p);
-            fa(client_socket,json_str);
-            mywait(epoll_fd);
-            json_str = shou(client_socket);
+            fa(json_str);
+            mywait();
+            json_str = shou();
             t = from_json<yesorno>(json_str);
             if(t.state == STATE_YES)
                 break;
@@ -193,4 +217,469 @@ void begin(int clientsocket,int epollfd){
                 std::cout << '\n' << "信息错误!" << '\n';
         }
     }
+}
+
+void begin2(){
+    std::string option;
+    while(1){
+        std::cout << "----------------------" << '\n';
+        std::cout << "1.好友" << '\n';
+        std::cout << "2.群聊" << '\n';
+        std::cout << "----------------------" << '\n';
+        std::cin >> option;
+        if(option == "1")
+            begin3();
+        else if(option == "2")
+            begin4();
+        else
+            std::cout << '\n' << "请输入正确选项!" << "\n\n";
+    }
+}
+
+void begin3(){
+    std::string option;
+    while(1){
+        std::cout << "----------------------" << '\n';
+        std::cout << "1.好友列表" << '\n';
+        std::cout << "2.聊天" << '\n';
+        std::cout << "3.好友管理" << '\n';
+        std::cout << "4.返回上一界面" << '\n';
+        std::cout << "----------------------" << '\n';
+        std::cin >> option;
+        if(option == "1")
+            flist();
+        else if(option == "2")
+            begin5();
+        else if(option == "3")
+            begin6();
+        else if(option == "4")
+            break;
+        else
+            std::cout << '\n' << "请输入正确选项!" << "\n\n";
+    }
+}
+
+void begin4(){
+    std::string option;
+    while(1){
+        std::cout << "----------------------" << '\n';
+        std::cout << "1.群聊列表" << '\n';
+        std::cout << "2.群聊天" << '\n';
+        std::cout << "3.群聊管理" << '\n';
+        std::cout << "4.返回上一界面" << '\n';
+        std::cout << "----------------------" << '\n';
+        std::cin >> option;
+        if(option == "1")
+            glist();
+        else if(option == "2")
+            begin7();
+        else if(option == "3")
+            begin8();
+        else if(option == "4")
+            break;
+        else
+            std::cout << '\n' << "请输入正确选项!" << "\n\n";
+    }
+}
+
+void begin5(){
+    std::string option;
+    while(1){
+        std::cout << "----------------------" << '\n';
+        std::cout << "1.聊天" << '\n';
+        std::cout << "2.文件发送" << '\n';
+        std::cout << "3.聊天记录" << '\n';
+        std::cout << "4.文件记录" << '\n';
+        std::cout << "5.返回上一界面" << '\n';
+        std::cout << "----------------------" << '\n';
+        std::cin >> option;
+        if(option == "1")
+            fchat();
+        else if(option == "2")
+            fsendfile();
+        else if(option == "3")
+            fhistory();
+        else if(option == "4")
+            ffilehistory();
+        else if(option == "5")
+            break;
+        else
+            std::cout << '\n' << "请输入正确选项!" << "\n\n";
+    }
+}
+
+void begin6(){
+    std::string option;
+    while(1){
+        std::cout << "----------------------" << '\n';
+        std::cout << "1.好友添加" << '\n';
+        std::cout << "2.好友删除" << '\n';
+        std::cout << "3.好友屏蔽" << '\n';
+        std::cout << "4.好友查询" << '\n';
+        std::cout << "5.好友申请" << '\n';
+        std::cout << "6.返回上一界面" << '\n';
+        std::cout << "----------------------" << '\n';
+        std::cin >> option;
+        if(option == "1")
+            fadd();
+        else if(option == "2")
+            fdel();
+        else if(option == "3")
+            fblock();
+        else if(option == "4")
+            fsearch();
+        else if(option == "5")
+            fapplication();
+        else if(option == "6")
+            break;
+        else
+            std::cout << '\n' << "请输入正确选项!" << "\n\n";
+    }
+}
+
+void begin7(){
+    std::string option;
+    while(1){
+        std::cout << "----------------------" << '\n';
+        std::cout << "1.群聊天" << '\n';
+        std::cout << "2.群文件发送" << '\n';
+        std::cout << "3.群聊天记录" << '\n';
+        std::cout << "4.群文件记录" << '\n';
+        std::cout << "5.返回上一界面" << '\n';
+        std::cout << "----------------------" << '\n';
+        std::cin >> option;
+        if(option == "1")
+            gchat();
+        else if(option == "2")
+            gsendfile;
+        else if(option == "3")
+            ghistory();
+        else if(option == "4")
+            gfilehistory();
+        else if(option == "5")
+            break;
+        else
+            std::cout << '\n' << "请输入正确选项!" << "\n\n";
+    }
+}
+
+void begin8(){
+    std::string option;
+    while(1){
+        std::cout << "----------------------" << '\n';
+        std::cout << "1.群创建" << '\n';
+        std::cout << "2.群解散" << '\n';
+        std::cout << "3.申请加群" << '\n';
+        std::cout << "4.退出群聊" << '\n';
+        std::cout << "5.添加管理员" << '\n';
+        std::cout << "6.删除管理员" << '\n';
+        std::cout << "7.审核" << '\n';
+        std::cout << "8.删除成员" << '\n';
+        std::cout << "9.返回上一界面" << '\n';
+        std::cout << "----------------------" << '\n';
+        std::cin >> option;
+        if(option == "1")
+            gcreation();
+        else if(option == "2")
+            gdissolution();
+        else if(option == "3")
+            gapplication();
+        else if(option == "4")
+            gexit();
+        else if(option == "5")
+            addmanager();
+        else if(option == "6")
+            delmanager();
+        else if(option == "7")
+            examine();
+        else if(option == "8")
+            delmember();
+        else if(option == "9")
+            break;
+        else
+            std::cout << '\n' << "请输入正确选项!" << "\n\n";
+    }
+}
+
+void flist(){
+    flist1 p1;
+    std::vector<ffriend> t;
+    std::string json_str;
+    p1 = {STATE_FLIST1};
+    json_str = to_json(p1);
+    fa(json_str);
+    mywait();
+    json_str = shou();
+    t = from__json<ffriend>(json_str);
+    for(const auto& ffriend : t){
+        std::cout << "id:" << ffriend.id << ",state:" << ffriend.ustate << std::endl;
+    }
+}
+
+void glist(){
+    glist1 p1;
+    std::vector<fgroup> t;
+    std::string json_str;
+    p1 = {STATE_GLIST1};
+    json_str = to_json(p1);
+    fa(json_str);
+    mywait();
+    json_str = shou();
+    t = from__json<fgroup>(json_str);
+    for(const auto& fgroup : t){
+        std::cout << "gid:" << fgroup.gid << ",leader:" << fgroup.g_leader << '\n';
+        std::cout << "manager:";
+        for(const auto& str : fgroup.manager){
+            std::cout << str <<" "; 
+        }
+        std::cout << '\n' << "member:";
+        for(const auto& str : fgroup.member){
+            std::cout <<str << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
+void fchat(){
+    fa();
+    mywait();
+    shou();
+    xuan
+    fa();
+}
+
+void fsendfile(){
+    fa();
+    mywait();
+    shou();
+    xuan
+    fa();
+}
+
+void fhistory(){
+    fa();
+    mywait();
+    shou();
+    xuan
+    fa();
+    shou();
+    cin
+}
+
+void ffilehistory(){
+    fa();
+    mywait();
+    shou();
+    xuan
+    fa();
+    shou();
+    cin
+}
+
+void fadd(){
+    std::string id;
+    std::string json_str;
+    fadd1 p;
+    yesorno t;
+    std::cout << '\n' << "请输入你要添加好友的id:";
+    std::cin >> id;
+    p = {STATE_FADD1,id};
+    json_str = to_json(p);
+    fa(json_str);
+    mywait();
+    json_str = shou();
+    t = from_json<yesorno>(json_str);
+    if(t.state == STATE_YES)
+        std::cout << '\n' << "好友申请已发送!" << '\n';
+    else if(t.state == STATE_NOEXIT)
+        std::cout << '\n' << "该用户不存在!" << '\n';
+    else if(t.state == STATE_HAVEDONE)
+        std::cout << '\n' << "他已经是你的好友了!" << '\n';
+    else
+        exit(1);
+}
+
+void fdel(){
+    std::string id;
+    std::string json_str;
+    fdel1 p;
+    yesorno t;
+    std::cout << '\n' << "请输入你要删除好友的id:";
+    std::cin >> id;
+    p = {STATE_FDEL1,id};
+    json_str = to_json(p);
+    fa(json_str);
+    mywait();
+    json_str = shou();
+    t = from_json<yesorno>(json_str);
+    if(t.state == STATE_YES)
+        std::cout << '\n' << "好友已删除!" << '\n';
+    else if(t.state == STATE_NOEXIT)
+        std::cout << '\n' << "该用户不存在!" << '\n';
+    else if(t.state == STATE_NOFRIEND)
+        std::cout << '\n' << "他本来就不是你的好友!" << '\n';
+    else
+        exit(1);
+}
+
+void fblock(){
+    std::string id;
+    std::string json_str;
+    fdel1 p;
+    yesorno t;
+    std::cout << '\n' << "请输入你要屏蔽好友的id:";
+    std::cin >> id;
+    p = {STATE_FBLOCK1,id};
+    json_str = to_json(p);
+    fa(json_str);
+    mywait();
+    json_str = shou();
+    t = from_json<yesorno>(json_str);
+    if(t.state == STATE_YES)
+        std::cout << '\n' << "好友已屏蔽!" << '\n';
+    else if(t.state == STATE_NOEXIT)
+        std::cout << '\n' << "该用户不存在!" << '\n';
+    else if(t.state == STATE_HAVEDONE)
+        std::cout << '\n' << "他已经被你屏蔽过了!" << '\n';
+    else
+        exit(1);
+}
+
+void fsearch(){
+    std::string id;
+    std::string json_str;
+    fdel1 p;
+    fsearch2 t;
+    std::cout << '\n' << "请输入你要查询好友的id:";
+    std::cin >> id;
+    p = {STATE_FSEARCH1,id};
+    json_str = to_json(p);
+    fa(json_str);
+    mywait();
+    json_str = shou();
+    t = from_json<fsearch2>(json_str);
+    if(t.state == STATE_YES){
+        std::cout << '\n' << "id:" << id << '\n';
+        if(t.ustate == STATE_YES)
+            std::cout << '\n' << "在线" << '\n';
+        else
+            std::cout << '\n' << "离线" << '\n';
+        if(t.co_state == STATE_YES)
+            std::cout << '\n' << "已屏蔽" << '\n';
+        else
+            std::cout << '\n' << "未屏蔽" << '\n';
+    }
+    else if(t.state == STATE_NOEXIT)
+        std::cout << '\n' << "该用户不存在!" << '\n';
+    else if(t.state == STATE_NOFRIEND)
+        std::cout << '\n' << "他不是你的好友!" << '\n';
+    else
+        exit(1);
+}
+
+void fapplication(){
+    fa();
+    mywait();
+    shou();
+    xuan
+    fa();
+}
+
+void gchat(){
+    fa();
+    mywait();
+    shou();
+    xuan
+    fa();
+}
+
+void gsendfile(){
+    fa();
+    mywait();
+    shou();
+    xuan
+    fa();
+}
+
+void ghistory(){
+    fa();
+    mywait();
+    shou();
+    xuan
+    fa();
+    shou();
+    cin
+}
+
+void gfilehistory(){
+    fa();
+    mywait();
+    shou();
+    xuan
+    fa();
+    shou();
+    cin
+}
+
+void gcreation(){
+    while(1){
+        fa();
+        mywait();
+        shou();
+        if()
+            break;
+        else
+            std::cout << 
+    }
+    std::cout <<
+}
+
+void gdissolution(){
+    fa();
+    mywait();
+    shou();
+    if()
+        std::cout <<
+    else
+        std::cout <<
+}
+
+void gexit(){
+    fa();
+    mywait();
+    shou();
+    xuan
+    fa();
+}
+
+void addmanager(){
+    fa();
+    mywait();
+    shou();
+    xuan
+    fa();
+}
+
+void delmanager(){
+    fa();
+    mywait();
+    shou();
+    xuan
+    fa();
+}
+
+void examine(){
+    fa();
+    mywait();
+    shou();
+    xuan
+    fa();
+}
+
+void delmember(){
+    fa();
+    mywait();
+    shou();
+    xuan
+    fa();
 }
