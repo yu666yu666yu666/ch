@@ -66,13 +66,6 @@ int main() {
                     continue;
                 }
                 std::cout << "New client connected." << std::endl;
-                search();
-                if(){
-                    init_person();
-                }
-                else{
-                    mod_peroin();
-                }
 
                 pid_t child_pid = fork();
                 if (child_pid == 0) {

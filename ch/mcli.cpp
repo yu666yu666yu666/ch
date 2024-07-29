@@ -32,7 +32,7 @@ int main() {
         std::cerr << "Failed to add socket to epoll instance." << std::endl;
         return 1;
     }
-
+    begin(client_socket,epoll_fd);
     while (true) {
         struct epoll_event events[1];
         int num_events = epoll_wait(epoll_fd, events, 1, -1);

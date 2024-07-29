@@ -60,6 +60,12 @@ enum {
 };
 
 void run(int client_socket);
+void fa(int client_socket,std::string json_str);
+std::string shou(int client_socket);
+void mywait(int epoll_fd);
+void begin(int clientsocket,int epollfd);
+
+
 
 class personmod{
 
@@ -116,6 +122,9 @@ struct logoff{
     std::string id;
     std::string password;
 };
+struct yesorno{
+    int state;
+}
 
 struct pfriend{
     std::string id;
