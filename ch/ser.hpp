@@ -42,7 +42,17 @@ enum {
     STATE_FBLOCK1,
     STATE_FSEARCH1,
     STATE_FSEARCH2,
-
+    STATE_FAPPLICATION1,
+    STATE_FAPPLICATION3,
+    STATE_GCREATION1,
+    STATE_GDISSOLUTION1,
+    STATE_GAPPLICATION1,
+    STATE_GEXIT1,
+    STATE_ADDMANAGER1,
+    STATE_DELMANAGER1,
+    STATE_DELMEMBER1,
+    STATE_EXAMINE1,
+    STATE_EXAMINE3,
 
 
 
@@ -73,9 +83,11 @@ enum {
     STATE_GRO_EX,
     STATE_GRO_DEL_ME,
 
-   
-    STATE_NOEXIT,
+
+    STATE_GNOEXIT,
+    STATE_FNOEXIT,
     STATE_NOFRIEND,
+    STATE_NOGROUP,
     STATE_HAVEDONE,
     STATE_YES,
     STATE_NO
@@ -108,14 +120,14 @@ void gchat();
 void gsendfile();
 void ghistory();
 void gfilehistory();
-gcreation();
-gdissolution();
-gapplication();
-gexit();
-addmanager();
-delmanager();
-examine();
-delmember();
+void gcreation();
+void gdissolution();
+void gapplication();
+void gexit();
+void addmanager();
+void delmanager();
+void examine();
+void delmember();
 
 class personmod{
 
@@ -209,6 +221,59 @@ struct fsearch2{
     int ustate;
     int co_state;
 };
+struct fapplication1{
+    int state;
+};
+struct fapplication2{
+    std::vector<std::string> id;
+};
+struct fapplication3{
+    int state;
+    std::vector<std::string> id;
+};
+struct gcreation1{
+    int state;
+    std::string gid;
+};
+struct gdissolution1{
+    int state;
+    std::string gid;
+};
+struct gapplication1{
+    int state;
+    std::string gid;
+};
+struct gexit1{
+    int state;
+    std::string gid;
+};
+struct addmanager1{
+    int state;
+    std::string gid;
+    std::string id;
+};
+struct delmanager1{
+    int state;
+    std::string gid;
+    std::string id;
+};
+struct delmember1{
+    int state;
+    std::string gid;
+    std::string id;
+};
+struct examine1{
+    int state;
+};
+struct examine2{
+    std::vector<std::string> id;
+};
+struct examine3{
+    int state;
+    std::vector<std::string> id;
+};
+
+
 
 
 
