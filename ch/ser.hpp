@@ -11,6 +11,10 @@
 #include <sys/epoll.h>
 #include <vector>
 #include <map>
+#include <ctime>
+#include <chrono>
+#include <sstream>
+#include <string>
 #include <thread>
 #include <mutex>
 #include <hiredis/hiredis.h>
@@ -37,6 +41,9 @@ enum {
     STATE_LOG_OFF,
     STATE_FLIST1,
     STATE_GLIST1,
+    STATE_FCHAT1,
+    STATE_FHISTORY1,
+    STATE_FHISTORY2,
     STATE_FADD1,
     STATE_FDEL1,
     STATE_FBLOCK1,
@@ -44,6 +51,9 @@ enum {
     STATE_FSEARCH2,
     STATE_FAPPLICATION1,
     STATE_FAPPLICATION3,
+    STATE_GCHAT1,
+    STATE_GHISTORY1,
+    STATE_GHISTORY2,
     STATE_GCREATION1,
     STATE_GDISSOLUTION1,
     STATE_GAPPLICATION1,
@@ -97,6 +107,7 @@ void run(int client_socket);
 void fa(std::string json_str);
 std::string shou();
 void mywait();
+std::string gettime();
 void begin1();
 void begin2();
 void begin3();
@@ -204,6 +215,19 @@ struct fgroup{
     std::vector<std::string> manager;
     std::vector<std::string> member;
 };
+struct fchat1{
+    int state;
+    std::string id;
+    std::vector<std::string> chat;
+};
+struct fhistory1{
+    int state;
+    std::string id;
+};
+struct fhistory2{
+    int state;
+    std::vector<std::string> chathistory;
+};
 struct fadd1{
     int state;
     std::string id;
@@ -231,6 +255,19 @@ struct fapplication3{
     int state;
     std::vector<std::string> id;
 };
+struct gchat1{
+    int state;
+    std::string gid;
+    std::vector<std::string> gchat;
+};
+struct ghistory1{
+    int state;
+    std::string gid;
+};
+struct ghistory2{
+    int state;
+    std::vector<std::string> chatghistory;
+}; 
 struct gcreation1{
     int state;
     std::string gid;
@@ -290,15 +327,15 @@ struct pgroup{
     std::vector<std::string> manager;
     std::vector<std::string> member;
 };
-class history{
+struct historys{
     std::string id1;
     std::string id2;
-    chat[];
+    std::vector<std::string> chathistory;
     fire[];
 };
-class ghistory{
+struct ghistorys{
     std::string gid;
-    chat[];
+    std::vector<std::string> chatghistory;
     fire[];
 };
 

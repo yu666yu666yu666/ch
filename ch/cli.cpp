@@ -31,6 +31,14 @@ std::vector<T> from__json(const std::string& jsonstr){
     return result;
 }
 
+std::string gettime(){
+    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+    std::time_t currenttime = std::chrono::system_clock::to_time_t(now);
+    std::stringstream ss;
+    ss << std::put_time(std::localtime(&currenttime),"%Y-%m-%d %H:%M:%S");
+    return ss.str();
+}
+
 void fa(std::string json_str){
     if (write(client_socket, json_str.c_str(), json_str.length()) == -1) {
         std::cerr << "Failed to send to socket." << std::endl;
@@ -441,46 +449,53 @@ void glist(){
 }
 
 void fchat(){
-    std::string json_str;
-    fapplication1 p;
-    fapplication2 t;
-    fapplication3 p1;
+    fchat1 p;
     std::string id;
     int m = 0;
-    p = {STATE_FAPPLICATION1};
-    json_str = to_json(p);
+    std::string chat;
+
+    flist1 p1;
+    std::vector<ffriend> t;
+    std::string json_str;
+    p1 = {STATE_FLIST1};
+    json_str = to_json(p1);
     fa(json_str);
     mywait();
     json_str = shou();
-    t = from_json<fapplication2>(json_str);
-    std::cout << "好友申请:";
-    for(const auto& str : t.id){
-        std::cout << '\n' << str ;
+    t = from__json<ffriend>(json_str);
+    for(const auto& ffriend : t){
+        std::cout << "id:" << ffriend.id << ",state:" << ffriend.ustate << std::endl;
     }
-    std::cout << std::endl;
+
     while(1){
-        std::cout << "输入你同意的用户的id:(输入“退出”离开此界面)";
+        std::cout << "输入你要聊天的用户的id:(输入“退出退出退出”离开聊天界面)";
         std::cin >> id;
-        if(id == "退出")
+        if(id == "退出退出退出")
             break;
-        for(const auto& str : t.id){
-            if(id == str)
+        for(const auto& str : t){
+            if(id == str.id){
                 m = 1;
+                p.id = id;
+                std::cout<< '\n' << "开始聊天:(输入“退出退出退出”离开和此用户聊天界面)";
+                while(1){
+                    std::cin >> chat;
+                    if(chat == "退出退出退出")
+                        break;
+                    p.chat.push_back(gettime()+=chat);
+                }
+                break;
+            }
         }
-        if(m)
-            p1.id.push_back(id);
+        if(m){
+            p.state = STATE_FCHAT1;
+            json_str = to_json(p);
+            fa(json_str);
+            m = 0;
+            p.chat.clear();
+        }
         else
-            std::cout << '\n' << "该用户不在列表中!";
-        m = 0;
+            std::cout << '\n' << "他不是你的好友!";
     }
-    p1.state = STATE_FAPPLICATION3;
-    json_str = to_json(p1);
-    fa(json_str);
-    fa();
-    mywait();
-    shou();
-    xuan
-    fa();
 }
 
 void fsendfile(){
@@ -502,9 +517,9 @@ void fsendfile(){
     }
     std::cout << std::endl;
     while(1){
-        std::cout << "输入你同意的用户的id:(输入“退出”离开此界面)";
+        std::cout << "输入你同意的用户的id:(输入“退出退出退出”离开此界面)";
         std::cin >> id;
-        if(id == "退出")
+        if(id == "退出退出退出")
             break;
         for(const auto& str : t.id){
             if(id == str)
@@ -529,14 +544,30 @@ void fsendfile(){
 void fhistory(){
     std::string json_str;
     std::string id;
-
-    fa();
-    mywait();
-    shou();
-    xuan
-    fa();
-    shou();
-    cin
+    fhistory1 p;
+    fhistory2 t;
+    while(1){
+        std::cout << '\n' << "你要查询与谁聊天记录?输入id:";
+        std::cin >> id;
+        p = {STATE_FHISTORY1,id};
+        json_str = to_json(p);
+        fa(json_str);
+        mywait();
+        json_str = shou();
+        t = from_json<fhistory2>(json_str);
+        if(t.state == STATE_YES)
+            break;
+        else if(t.state == STATE_NOFRIEND)
+            std::cout << '\n' << "他不是你的好友!";
+        else if(t.state == STATE_FNOEXIT)
+            std::cout << '\n' << "用户不存在!";
+        else 
+            exit(1);
+    }
+    for(const auto& str : t.chathistory){
+        std::cout << '\n' << str;
+    }
+    std::cout << std::endl;
 }
 
 void ffilehistory(){
@@ -546,7 +577,7 @@ void ffilehistory(){
     xuan
     fa();
     shou();
-    cin
+    std::cout;
 }
 
 void fadd(){
@@ -689,46 +720,54 @@ void fapplication(){
 }
 
 void gchat(){
-    std::string json_str;
-    fapplication1 p;
-    fapplication2 t;
-    fapplication3 p1;
-    std::string id;
+    gchat1 p;
+    std::string gid;
     int m = 0;
-    p = {STATE_FAPPLICATION1};
-    json_str = to_json(p);
+    std::string gchat;
+
+    glist1 p1;
+    std::vector<fgroup> t;
+    std::string json_str;
+    p1 = {STATE_GLIST1};
+    json_str = to_json(p1);
     fa(json_str);
     mywait();
     json_str = shou();
-    t = from_json<fapplication2>(json_str);
-    std::cout << "好友申请:";
-    for(const auto& str : t.id){
-        std::cout << '\n' << str ;
+    t = from__json<fgroup>(json_str);
+    for(const auto& fgroup : t){
+        std::cout << "gid:" << fgroup.gid << '\n';
     }
     std::cout << std::endl;
+
     while(1){
-        std::cout << "输入你同意的用户的id:(输入“退出”离开此界面)";
-        std::cin >> id;
-        if(id == "退出")
+        std::cout << "输入你要聊天的群gid:(输入“退出退出退出”离开聊天界面)";
+        std::cin >> gid;
+        if(gid == "退出退出退出")
             break;
-        for(const auto& str : t.id){
-            if(id == str)
+        for(const auto& str : t){
+            if(gid == str.gid){
                 m = 1;
+                p.gid = gid;
+                std::cout<< '\n' << "开始聊天:(输入“退出退出退出”离开和此群聊天界面)";
+                while(1){
+                    std::cin >> gchat;
+                    if(gchat == "退出退出退出")
+                        break;
+                    p.gchat.push_back(gettime()+=gchat);
+                }
+                break;
+            }
         }
-        if(m)
-            p1.id.push_back(id);
+        if(m){
+            p.state = STATE_GCHAT1;
+            json_str = to_json(p);
+            fa(json_str);
+            m = 0;
+            p.gchat.clear();
+        }
         else
-            std::cout << '\n' << "该用户不在列表中!";
-        m = 0;
+            std::cout << '\n' << "你不是该群成员!";
     }
-    p1.state = STATE_FAPPLICATION3;
-    json_str = to_json(p1);
-    fa(json_str);
-    fa();
-    mywait();
-    shou();
-    xuan
-    fa();
 }
 
 void gsendfile(){
@@ -752,7 +791,7 @@ void gsendfile(){
     while(1){
         std::cout << "输入你同意的用户的id:(输入“退出退出退出”离开此界面)";
         std::cin >> id;
-        if(id == "退出")
+        if(id == "退出退出退出")
             break;
         for(const auto& str : t.id){
             if(id == str)
@@ -775,13 +814,32 @@ void gsendfile(){
 }
 
 void ghistory(){
-    fa();
-    mywait();
-    shou();
-    xuan
-    fa();
-    shou();
-    cin
+    std::string json_str;
+    std::string gid;
+    ghistory1 p;
+    ghistory2 t;
+    while(1){
+        std::cout << '\n' << "你要查询哪个群的聊天记录?输入gid:";
+        std::cin >> gid;
+        p = {STATE_GHISTORY1,gid};
+        json_str = to_json(p);
+        fa(json_str);
+        mywait();
+        json_str = shou();
+        t = from_json<ghistory2>(json_str);
+        if(t.state == STATE_YES)
+            break;
+        else if(t.state == STATE_NOGROUP)
+            std::cout << '\n' << "你不是群成员!";
+        else if(t.state == STATE_GNOEXIT)
+            std::cout << '\n' << "群聊不存在!";
+        else 
+            exit(1);
+    }
+    for(const auto& str : t.chatghistory){
+        std::cout << '\n' << str;
+    }
+    std::cout << std::endl;
 }
 
 void gfilehistory(){
@@ -791,7 +849,7 @@ void gfilehistory(){
     xuan
     fa();
     shou();
-    cin
+    std::cout;
 }
 
 void gcreation(){
