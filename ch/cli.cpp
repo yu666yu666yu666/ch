@@ -499,46 +499,59 @@ void fchat(){
 }
 
 void fsendfile(){
-    std::string json_str;
-    fapplication1 p;
-    fapplication2 t;
-    fapplication3 p1;
+    fsendfile1 p;
     std::string id;
     int m = 0;
-    p = {STATE_FAPPLICATION1};
-    json_str = to_json(p);
+    std::string filename;
+
+    flist1 p1;
+    std::vector<ffriend> t;
+    std::string json_str;
+    p1 = {STATE_FLIST1};
+    json_str = to_json(p1);
     fa(json_str);
     mywait();
     json_str = shou();
-    t = from_json<fapplication2>(json_str);
-    std::cout << "好友申请:";
-    for(const auto& str : t.id){
-        std::cout << '\n' << str ;
+    t = from__json<ffriend>(json_str);
+    for(const auto& ffriend : t){
+        std::cout << "id:" << ffriend.id << ",state:" << ffriend.ustate << std::endl;
     }
-    std::cout << std::endl;
+
     while(1){
-        std::cout << "输入你同意的用户的id:(输入“退出退出退出”离开此界面)";
+        std::cout << "输入你要发送文件的用户的id:(输入“退出退出退出”离开发送文件界面)";
         std::cin >> id;
         if(id == "退出退出退出")
             break;
-        for(const auto& str : t.id){
-            if(id == str)
+        for(const auto& str : t){
+            if(id == str.id){
                 m = 1;
+                p.id = id;
+                std::cout<< '\n' << "要发送的文件:";
+                std::cin >> filename;
+                break;
+            }
         }
-        if(m)
-            p1.id.push_back(id);
+        if(m){
+            std::ifstream file(filename,std::ios::binary);
+            if(!file.is_open()){
+                std::cerr << "Failed to open file:" << filename << std::endl;
+                exit(1);
+            }
+            p.filename = filename;
+            file.seekg(0,std::ios::end);
+            p.filesize = file.tellg();
+            file.seekg(0,std::ios::beg);
+            p.content.resize(p.filesize);
+            file.read(p.content.data(),p.filesize);
+            file.close();
+            p.state = STATE_FSENDFILE1;
+            json_str = to_json(p);
+            fa(json_str);
+            m = 0;
+        }
         else
-            std::cout << '\n' << "该用户不在列表中!";
-        m = 0;
+            std::cout << '\n' << "他不是你的好友!";
     }
-    p1.state = STATE_FAPPLICATION3;
-    json_str = to_json(p1);
-    fa(json_str);
-    fa();
-    mywait();
-    shou();
-    xuan
-    fa();
 }
 
 void fhistory(){
@@ -547,7 +560,7 @@ void fhistory(){
     fhistory1 p;
     fhistory2 t;
     while(1){
-        std::cout << '\n' << "你要查询与谁聊天记录?输入id:";
+        std::cout << '\n' << "你要查询与谁的聊天记录?输入id:";
         std::cin >> id;
         p = {STATE_FHISTORY1,id};
         json_str = to_json(p);
@@ -571,13 +584,50 @@ void fhistory(){
 }
 
 void ffilehistory(){
-    fa();
+    fhistory1 p2;
+    std::vector<ffilehistory2> p;
+    std::string id;
+    int m = 0;
+    std::string filename;
+
+    flist1 p1;
+    std::vector<ffriend> t;
+    std::string json_str;
+    p1 = {STATE_FLIST1};
+    json_str = to_json(p1);
+    fa(json_str);
     mywait();
-    shou();
-    xuan
-    fa();
-    shou();
-    std::cout;
+    json_str = shou();
+    t = from__json<ffriend>(json_str);
+    for(const auto& ffriend : t){
+        std::cout << "id:" << ffriend.id << ",state:" << ffriend.ustate << std::endl;
+    }
+
+    while(1){
+        std::cout << "输入你要查看文件记录的用户的id:(输入“退出退出退出”离开查看文件界面)";
+        std::cin >> id;
+        if(id == "退出退出退出")
+            break;
+        for(const auto& str : t){
+            if(id == str.id){
+                std::string id = id;
+                m = 1;
+                break;
+            }
+        }
+        if(m){
+            p2.state = STATE_FFILEHISTORY1;
+            json_str = to_json(p);
+            fa(json_str);
+            mywait();
+            json_str = shou();
+            p = from__json<ffilehistory2>(json_str);
+            std::cout;
+            m = 0;
+        }
+        else
+            std::cout << '\n' << "他不是你的好友!";
+    }
 }
 
 void fadd(){
@@ -771,46 +821,60 @@ void gchat(){
 }
 
 void gsendfile(){
-    std::string json_str;
-    fapplication1 p;
-    fapplication2 t;
-    fapplication3 p1;
-    std::string id;
+    gsendfile1 p;
+    std::string gid;
     int m = 0;
-    p = {STATE_FAPPLICATION1};
-    json_str = to_json(p);
+    std::string filename;
+
+    glist1 p1;
+    std::vector<fgroup> t;
+    std::string json_str;
+    p1 = {STATE_GLIST1};
+    json_str = to_json(p1);
     fa(json_str);
     mywait();
     json_str = shou();
-    t = from_json<fapplication2>(json_str);
-    std::cout << "好友申请:";
-    for(const auto& str : t.id){
-        std::cout << '\n' << str ;
+    t = from__json<fgroup>(json_str);
+    for(const auto& fgroup : t){
+        std::cout << "gid:" << fgroup.gid << '\n';
     }
     std::cout << std::endl;
+
     while(1){
-        std::cout << "输入你同意的用户的id:(输入“退出退出退出”离开此界面)";
-        std::cin >> id;
-        if(id == "退出退出退出")
+        std::cout << "输入你要发送文件的群的gid:(输入“退出退出退出”离开发送文件界面)";
+        std::cin >> gid;
+        if(gid == "退出退出退出")
             break;
-        for(const auto& str : t.id){
-            if(id == str)
+        for(const auto& str : t){
+            if(gid == str.gid){
                 m = 1;
+                p.gid = gid;
+                std::cout<< '\n' << "要发送的文件:";
+                std::cin >> filename;
+                break;
+            }
         }
-        if(m)
-            p1.id.push_back(id);
+        if(m){
+            std::ifstream file(filename,std::ios::binary);
+            if(!file.is_open()){
+                std::cerr << "Failed to open file:" << filename << std::endl;
+                exit(1);
+            }
+            p.filename = filename;
+            file.seekg(0,std::ios::end);
+            p.filesize = file.tellg();
+            file.seekg(0,std::ios::beg);
+            p.content.resize(p.filesize);
+            file.read(p.content.data(),p.filesize);
+            file.close();
+            p.state = STATE_GSENDFILE1;
+            json_str = to_json(p);
+            fa(json_str);
+            m = 0;
+        }
         else
-            std::cout << '\n' << "该用户不在列表中!";
-        m = 0;
+            std::cout << '\n' << "你不是群成员!";
     }
-    p1.state = STATE_FAPPLICATION3;
-    json_str = to_json(p1);
-    fa(json_str);
-    fa();
-    mywait();
-    shou();
-    xuan
-    fa();
 }
 
 void ghistory(){
@@ -843,15 +907,52 @@ void ghistory(){
 }
 
 void gfilehistory(){
-    fa();
-    mywait();
-    shou();
-    xuan
-    fa();
-    shou();
-    std::cout;
-}
+    ghistory1 p2;
+    std::vector<gfilehistory2> p;
+    std::string gid;
+    int m = 0;
+    std::string filename;
 
+    glist1 p1;
+    std::vector<fgroup> t;
+    std::string json_str;
+    p1 = {STATE_GLIST1};
+    json_str = to_json(p1);
+    fa(json_str);
+    mywait();
+    json_str = shou();
+    t = from__json<fgroup>(json_str);
+    for(const auto& fgroup : t){
+        std::cout << "gid:" << fgroup.gid << '\n';
+    }
+    std::cout << std::endl;
+
+    while(1){
+        std::cout << "输入你要查看文件记录的群的gid:(输入“退出退出退出”离开查看文件界面)";
+        std::cin >> gid;
+        if(gid == "退出退出退出")
+            break;
+        for(const auto& str : t){
+            if(gid == str.gid){
+                std::string gid = gid;
+                m = 1;
+                break;
+            }
+        }
+        if(m){
+            p2.state = STATE_GFILEHISTORY1;
+            json_str = to_json(p);
+            fa(json_str);
+            mywait();
+            json_str = shou();
+            p = from__json<gfilehistory2>(json_str);
+            std::cout;
+            m = 0;
+        }
+        else
+            std::cout << '\n' << "他不是你的好友!";
+    }
+}
 void gcreation(){
     std::string json_str;
     std::string gid;

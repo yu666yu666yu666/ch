@@ -14,7 +14,9 @@
 #include <ctime>
 #include <chrono>
 #include <sstream>
+#include <fstream>
 #include <string>
+#include <cstddef>
 #include <thread>
 #include <mutex>
 #include <hiredis/hiredis.h>
@@ -42,8 +44,10 @@ enum {
     STATE_FLIST1,
     STATE_GLIST1,
     STATE_FCHAT1,
+    STATE_FSENDFILE1,
     STATE_FHISTORY1,
     STATE_FHISTORY2,
+    STATE_FFILEHISTORY1,
     STATE_FADD1,
     STATE_FDEL1,
     STATE_FBLOCK1,
@@ -54,6 +58,8 @@ enum {
     STATE_GCHAT1,
     STATE_GHISTORY1,
     STATE_GHISTORY2,
+    STATE_GFILEHISTORY1,
+    STATE_GSENDFILE1,
     STATE_GCREATION1,
     STATE_GDISSOLUTION1,
     STATE_GAPPLICATION1,
@@ -103,7 +109,7 @@ enum {
     STATE_NO
 };
 
-void run(int client_socket);
+//void run(int client_socket);
 void fa(std::string json_str);
 std::string shou();
 void mywait();
@@ -139,30 +145,6 @@ void addmanager();
 void delmanager();
 void examine();
 void delmember();
-
-class personmod{
-
-    init_person();
-    mod_person();
-    del_person();
-
-};
-
-class person{
-    struct pperson{
-        std::string id;
-        std::string password;
-        std::string problem;
-        std::string awswer;
-        int ustate;
-        std::vector<pfriend> friends;
-        std::vector<pgroup> groups;
-        sockaddr_in addr;
-        int WORKSTATE;
-        std::vector<std::string> applications;
-    };
-
-};
 
 struct pregister1{
     int state;
@@ -211,7 +193,7 @@ struct ffriend{
 };
 struct fgroup{
     std::string gid;
-    std::string g_leader;//group leader
+    std::string g_leader;
     std::vector<std::string> manager;
     std::vector<std::string> member;
 };
@@ -227,6 +209,22 @@ struct fhistory1{
 struct fhistory2{
     int state;
     std::vector<std::string> chathistory;
+};
+struct fsendfile1{
+    int state;
+    std::string id;
+    std::string filename;
+    std::size_t filesize;
+    std::vector<char> content;
+};
+struct ffilehistory1{
+    int state;
+    std::string id;
+};
+struct ffilehistory2{
+    std::string filename;
+    std::size_t filesize;
+    std::vector<char> content;
 };
 struct fadd1{
     int state;
@@ -268,6 +266,22 @@ struct ghistory2{
     int state;
     std::vector<std::string> chatghistory;
 }; 
+struct gsendfile1{
+    int state;
+    std::string gid;
+    std::string filename;
+    std::size_t filesize;
+    std::vector<char> content;
+};
+struct gfilehistory1{
+    int state;
+    std::string gid;
+};
+struct gfilehistory2{
+    std::string filename;
+    std::size_t filesize;
+    std::vector<char> content;
+};
 struct gcreation1{
     int state;
     std::string gid;
@@ -309,13 +323,35 @@ struct examine3{
     int state;
     std::vector<std::string> id;
 };
+struct tfile{
+    std::string filename;
+    std::size_t filesize;
+    std::vector<char> content;
+};
+/*
+class personmod{
 
+    init_person();
+    mod_person();
+    del_person();
 
+};
 
+class person{
+    struct pperson{
+        std::string id;
+        std::string password;
+        std::string problem;
+        std::string awswer;
+        int ustate;
+        std::vector<pfriend> friends;
+        std::vector<pgroup> groups;
+        sockaddr_in addr;
+        int WORKSTATE;
+        std::vector<std::string> applications;
+    };
 
-
-
-
+};
 
 struct pfriend{
     std::string id;
@@ -323,7 +359,7 @@ struct pfriend{
 };
 struct pgroup{
     std::string gid;
-    std::string g_leader;//group leader
+    std::string g_leader;
     std::vector<std::string> manager;
     std::vector<std::string> member;
 };
@@ -339,13 +375,8 @@ struct ghistorys{
     fire[];
 };
 
-
-
-
-
-
 class ser{
 
 };
-
+*/
 #endif  //__PROTO_H__
