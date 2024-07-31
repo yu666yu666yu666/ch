@@ -21,7 +21,7 @@
 
 class person{
     
-}
+};
 
 
-#endif  //__PROTO_H__
+#endif  __PROTO_H__
