@@ -1,5 +1,5 @@
-#ifndef __PROTO_H__
-#define __PROTO_H__
+#ifndef __CLI_HPP__
+#define __CLI_HPP__
 
 #include <iostream>
 #include <string.h>
@@ -28,7 +28,6 @@ using json = nlohmann::json;
 #define MAX_EVENTS 1024
 #define BUFFER_SIZE 1024
 #define IP "209.141.34.136"
-//#define FMT_STAMP "%lld\r\n" // 格式化参数
 
 //extern int epoll_fd;
 //extern int epoll_fd1;
@@ -76,19 +75,12 @@ enum {
     STATE_EXAMINE3,
 
 
-
-
     STATE_CFAPPLICATION,
     STATE_CFCHAT,
     STATE_CFFILE,
     STATE_CGAPPLICATION,
     STATE_CGCHAT,
     STATE_CGFILE,
-
-
-
-
-
 
 
     STATE_FRIENDS,
@@ -127,10 +119,13 @@ enum {
     STATE_NO
 };
 
+std::string gettime();
 void fa(std::string json_str);
 std::string shou();
+std::string shou1();
 //void mywait();
 std::string gettime();
+void* b_thread_function(void*);
 void begin1();
 void begin2();
 void begin3();
@@ -218,8 +213,9 @@ struct fgroup{
 };
 struct fchat1{
     int state;
+    std::string cid;
     std::string id;
-    std::vector<std::string> chat;
+    std::string chat;
 };
 struct fhistory1{
     int state;
@@ -232,6 +228,7 @@ struct fhistory2{
 };
 struct fsendfile1{
     int state;
+    std::string cid;
     std::string id;
     std::string filename;
     std::size_t filesize;
@@ -239,6 +236,7 @@ struct fsendfile1{
 };
 struct ffilehistory1{
     int state;
+    std::string cid;
     std::string id;
 };
 struct ffilehistory2{
@@ -285,8 +283,9 @@ struct fapplication3{
 };
 struct gchat1{
     int state;
+    std::string cid;
     std::string gid;
-    std::vector<std::string> gchat;
+    std::string gchat;
 };
 struct ghistory1{
     int state;
@@ -299,6 +298,7 @@ struct ghistory2{
 }; 
 struct gsendfile1{
     int state;
+    std::string cid;
     std::string gid;
     std::string filename;
     std::size_t filesize;
@@ -306,6 +306,7 @@ struct gsendfile1{
 };
 struct gfilehistory1{
     int state;
+    std::string cid;
     std::string gid;
 };
 struct gfilehistory2{
@@ -371,4 +372,4 @@ struct cshou{
     std::string gid;
 };
 
-#endif  //__PROTO_H__
+#endif

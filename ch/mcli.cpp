@@ -56,14 +56,13 @@ int main() {
     myid.clear();
 
     begin1();
-
-    pthread_t b_thread;
-    pthread_create(&b_thread,nullptr,b_thread_function,nullptr);
-    pthread_join(b_thread,nullptr);
     
+    std::thread threads;
+    threads = std::thread(b_thread_function);
+
     begin2();
 }
-    /*
+/*
     while (true) {
         struct epoll_event events[1];
         int num_events = epoll_wait(epoll_fd, events, 1, -1);

@@ -21,7 +21,7 @@
 #include <mutex>
 #include <hiredis/hiredis.h>
 //#include "nlohmann/json.hpp"
-#include "./json/single_include/nlohmann/json.hpp" 
+#include "/home/yu666/Desktop/ch/json/single_include/nlohmann/json.hpp"
 using json = nlohmann::json;
 
 #define SERVER_PORT 8000
@@ -379,4 +379,4 @@ struct ghistorys{
     fire[];
 }[];
 */
-#endif  //__PROTO_H__
+#endif
