@@ -31,7 +31,10 @@ using json = nlohmann::json;
 //#define FMT_STAMP "%lld\r\n" // 格式化参数
 
 extern int epoll_fd;
+extern int epoll_fd1;
 extern int client_socket;
+extern int client_socket1;
+extern std::string myid;
 
 enum {
     STATE_NONE = 0,
@@ -345,11 +348,11 @@ class person{
         std::string awswer;
         int ustate;
         std::vector<pfriend> friends;
-        std::vector<pgroup> groups;
-        sockaddr_in addr;
-        int WORKSTATE;
+        std::vector<std::string> groups;
+        sockaddr_in addr1 addr2;
+        //int WORKSTATE;
         std::vector<std::string> applications;
-    };
+    }[];
 
 };
 
@@ -362,21 +365,18 @@ struct pgroup{
     std::string g_leader;
     std::vector<std::string> manager;
     std::vector<std::string> member;
-};
+    std::vector<std::string> examine;
+}[];
 struct historys{
     std::string id1;
     std::string id2;
     std::vector<std::string> chathistory;
     fire[];
-};
+}[];
 struct ghistorys{
     std::string gid;
     std::vector<std::string> chatghistory;
     fire[];
-};
-
-class ser{
-
-};
+}[];
 */
 #endif  //__PROTO_H__

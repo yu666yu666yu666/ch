@@ -1,10 +1,15 @@
-#include "ser.hpp"
+#include "cli.hpp"
 #include "cli.cpp"
 
 int main() {
 
     client_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (client_socket == -1) {
+        std::cerr << "Failed to create socket." << std::endl;
+        return 1;
+    }
+    client_socket1 = socket(AF_INET, SOCK_STREAM, 0);
+    if (client_socket1 == -1) {
         std::cerr << "Failed to create socket." << std::endl;
         return 1;
     }
@@ -18,24 +23,47 @@ int main() {
         std::cerr << "Failed to connect to server." << std::endl;
         return 1;
     }
-    
+    if (connect(client_socket1, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
+        std::cerr << "Failed to connect to server." << std::endl;
+        return 1;
+    }
+
+    epoll_fd1 = epoll_create(6);
+    if (epoll_fd1 == -1) {
+        std::cerr << "Failed to create epoll instance." << std::endl;
+        return 1;
+    }
     epoll_fd = epoll_create(6);
     if (epoll_fd == -1) {
         std::cerr << "Failed to create epoll instance." << std::endl;
         return 1;
     }
 
-    struct epoll_event event;
+    struct epoll_event event,event1;
     event.events = EPOLLIN | EPOLLOUT;
     event.data.fd = client_socket;
     if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_socket, &event) == -1) {
         std::cerr << "Failed to add socket to epoll instance." << std::endl;
         return 1;
     }
-    //begin1(client_socket,epoll_fd);
-    //begin2(client_socket,epoll_fd);
+    event1.events = EPOLLIN ;
+    event1.data.fd = client_socket1;
+    if (epoll_ctl(epoll_fd1, EPOLL_CTL_ADD, client_socket1, &event1) == -1) {
+        std::cerr << "Failed to add socket to epoll instance." << std::endl;
+        return 1;
+    }
+
+    myid.clear();
+
     begin1();
+
+    pthread_t b_thread;
+    pthread_create(&b_thread,nullptr,b_thread_function,nullptr);
+    pthread_join(b_thread,nullptr);
+    
     begin2();
+}
+    /*
     while (true) {
         struct epoll_event events[1];
         int num_events = epoll_wait(epoll_fd, events, 1, -1);
@@ -72,3 +100,4 @@ int main() {
 
     return 0;
 }
+*/
