@@ -27,7 +27,7 @@ int main() {
         std::cerr << "Failed to connect to server." << std::endl;
         return 1;
     }
-
+/*
     epoll_fd1 = epoll_create(6);
     if (epoll_fd1 == -1) {
         std::cerr << "Failed to create epoll instance." << std::endl;
@@ -52,7 +52,7 @@ int main() {
         std::cerr << "Failed to add socket to epoll instance." << std::endl;
         return 1;
     }
-
+*/
     myid.clear();
 
     begin1();

@@ -30,11 +30,13 @@ using json = nlohmann::json;
 #define IP "209.141.34.136"
 //#define FMT_STAMP "%lld\r\n" // 格式化参数
 
-extern int epoll_fd;
-extern int epoll_fd1;
+//extern int epoll_fd;
+//extern int epoll_fd1;
 extern int client_socket;
 extern int client_socket1;
 extern std::string myid;
+extern std::string ccid;
+extern std::string ggid;
 
 enum {
     STATE_NONE = 0,
@@ -72,6 +74,17 @@ enum {
     STATE_DELMEMBER1,
     STATE_EXAMINE1,
     STATE_EXAMINE3,
+
+
+
+
+    STATE_CFAPPLICATION,
+    STATE_CFCHAT,
+    STATE_CFFILE,
+    STATE_CGAPPLICATION,
+    STATE_CGCHAT,
+    STATE_CGFILE,
+
 
 
 
@@ -116,7 +129,7 @@ enum {
 
 void fa(std::string json_str);
 std::string shou();
-void mywait();
+//void mywait();
 std::string gettime();
 void begin1();
 void begin2();
@@ -267,6 +280,7 @@ struct fapplication2{
 };
 struct fapplication3{
     int state;
+    std::string cid;
     std::vector<std::string> id;
 };
 struct gchat1{
@@ -347,7 +361,14 @@ struct examine2{
 };
 struct examine3{
     int state;
+    std::string cid;
+    std::string gid;
     std::vector<std::string> id;
 };
+struct cshou{
+    int state;
+    std::string did;
+    std::string gid;
+};
 
-#endif  __PROTO_H__
+#endif  //__PROTO_H__

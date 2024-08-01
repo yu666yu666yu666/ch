@@ -45,7 +45,7 @@ void fa(std::string json_str){
         exit(1);
     }
 }
-
+/*
 void mywait(){
     struct epoll_event events[1];
     int num_events = epoll_wait(epoll_fd, events, 1, -1);
@@ -63,7 +63,7 @@ void mywait1(){
         exit(1);
     }
 }
-
+*/
 std::string shou(){
     char buffer[BUFFER_SIZE];
     std::string json_str;
@@ -76,7 +76,7 @@ std::string shou(){
     return json_str;
 }
 
-void shou1(){
+std::string shou1(){
     char buffer[BUFFER_SIZE];
     std::string json_str;
     ssize_t bytes_read = read(client_socket1, buffer, BUFFER_SIZE);
@@ -85,13 +85,41 @@ void shou1(){
         exit(1);
     }
     json_str+=buffer;
-    std::cout << "[[" << json_str << "]]";
+    return json_str;
 }
 
 void* b_thread_function(void*){
+    std::string json_str;
+    cshou p;
     while(1){
-        mywait1();
-        shou1();
+//        mywait1();
+        json_str = shou1();
+        p = from_json<cshou>(json_str);
+        if(p.state == STATE_CFAPPLICATION)
+            std::cout << '\n' << "[[好友:" << p.did << " 向你发来好友申请!你可以前往查看]]" << '\n';
+        else if(p.state == STATE_CGAPPLICATION)
+            std::cout << '\n' << "[[用户:" << p.did << " 请求加入群聊:" << p.gid << " !你可以前往查看]]" << '\n';
+        else if(p.state == STATE_CFFILE)
+            std::cout << '\n' << "[[好友:" << p.did << " 给你发来一个文件!你可以前往查看]]" << '\n';
+        else if(p.state == STATE_CGFILE)
+            std::cout << '\n' << "[[用户:" << p.did << " 向群聊:" << p.gid << " 发送了一个文件!你可以前往查看]]" << '\n';
+        else if(p.state == STATE_CFCHAT){
+            if(p.did == ccid){
+                system("clear");
+            }
+            else
+                std::cout << '\n' << "[[好友:" << p.did << " 给你发来信息!你可以前往查看]]" << '\n';
+        }
+        else if(p.state == STATE_CGCHAT){
+            if(p.gid == ggid){
+                system("clear");
+            }
+            else
+                std::cout << '\n' << "[[群聊:" << p.gid << " 有新信息!你可以前往查看]]" << '\n';
+        }
+        else
+            exit(1);
+        memset(&p,0,sizeof(cshou));
     }
 }
 
@@ -121,7 +149,7 @@ void begin1(){
             p1 = {STATE_REGISTER1,myid};
             json_str = to_json(p1);
             fa(json_str);
-            mywait();
+//            mywait();
             json_str = shou();
             t = from_json<yesorno>(json_str);
             if(t.state == STATE_YES)
@@ -166,7 +194,7 @@ void begin1(){
             p = {STATE_LOG_ON,myid,password};
             json_str = to_json(p);
             fa(json_str);
-            mywait();
+//            mywait();
             json_str = shou();
             t = from_json<yesorno>(json_str);
             if(t.state == STATE_YES)
@@ -198,7 +226,7 @@ void begin1(){
             p1 = {STATE_FORGET1,myid,problem,awswer};
             json_str = to_json(p1);
             fa(json_str);
-            mywait();
+//            mywait();
             json_str = shou();
             t = from_json<yesorno>(json_str);
             if(t.state  == STATE_YES)
@@ -247,7 +275,7 @@ void begin1(){
             p = {STATE_LOG_OFF,id, password1};
             json_str = to_json(p);
             fa(json_str);
-            mywait();
+//            mywait();
             json_str = shou();
             t = from_json<yesorno>(json_str);
             if(t.state == STATE_YES)
@@ -482,7 +510,7 @@ void flist(){
     p1 = {STATE_FLIST1,myid};
     json_str = to_json(p1);
     fa(json_str);
-    mywait();
+//    mywait();
     json_str = shou();
     t = from__json<ffriend>(json_str);
     for(const auto& ffriend : t){
@@ -498,7 +526,7 @@ void glist(){
     p1 = {STATE_GLIST1,myid};
     json_str = to_json(p1);
     fa(json_str);
-    mywait();
+//    mywait();
     json_str = shou();
     t = from__json<fgroup>(json_str);
     for(const auto& fgroup : t){
@@ -528,7 +556,7 @@ void fchat(){
     p1 = {STATE_FLIST1};
     json_str = to_json(p1);
     fa(json_str);
-    mywait();
+//    mywait();
     json_str = shou();
     t = from__json<ffriend>(json_str);
     for(const auto& ffriend : t){
@@ -542,6 +570,7 @@ void fchat(){
             break;
         for(const auto& str : t){
             if(id == str.id){
+                ccid = id;
                 m = 1;
                 p.id = id;
                 std::cout<< '\n' << "开始聊天:(输入“退出退出退出”离开和此用户聊天界面)";
@@ -552,6 +581,7 @@ void fchat(){
                     p.chat.push_back(gettime()+=chat);
                 }
                 break;
+                ccid = "退出退出退出!";
             }
         }
         if(m){
@@ -578,7 +608,7 @@ void fsendfile(){
     p1 = {STATE_FLIST1};
     json_str = to_json(p1);
     fa(json_str);
-    mywait();
+//    mywait();
     json_str = shou();
     t = from__json<ffriend>(json_str);
     for(const auto& ffriend : t){
@@ -637,7 +667,7 @@ void fhistory(){
         }
         json_str = to_json(p);
         fa(json_str);
-        mywait();
+//        mywait();
         json_str = shou();
         t = from_json<fhistory2>(json_str);
         if(t.state == STATE_YES)
@@ -668,7 +698,7 @@ void ffilehistory(){
     p1 = {STATE_FLIST1};
     json_str = to_json(p1);
     fa(json_str);
-    mywait();
+//    mywait();
     json_str = shou();
     t = from__json<ffriend>(json_str);
     for(const auto& ffriend : t){
@@ -691,7 +721,7 @@ void ffilehistory(){
             p2.state = STATE_FFILEHISTORY1;
             json_str = to_json(p);
             fa(json_str);
-            mywait();
+//            mywait();
             json_str = shou();
             p = from__json<ffilehistory2>(json_str);
             std::cout;
@@ -715,7 +745,7 @@ void fadd(){
         p = {STATE_FADD1,myid,id};
         json_str = to_json(p);
         fa(json_str);
-        mywait();
+//        mywait();
         json_str = shou();
         t = from_json<yesorno>(json_str);
         if(t.state == STATE_YES)
@@ -742,7 +772,7 @@ void fdel(){
         p = {STATE_FDEL1,myid,id};
         json_str = to_json(p);
         fa(json_str);
-        mywait();
+//        mywait();
         json_str = shou();
         t = from_json<yesorno>(json_str);
         if(t.state == STATE_YES)
@@ -769,7 +799,7 @@ void fblock(){
         p = {STATE_FBLOCK1,myid,id};
         json_str = to_json(p);
         fa(json_str);
-        mywait();
+//        mywait();
         json_str = shou();
         t = from_json<yesorno>(json_str);
         if(t.state == STATE_YES)
@@ -798,7 +828,7 @@ void fsearch(){
         p = {STATE_FSEARCH1,myid,id};
         json_str = to_json(p);
         fa(json_str);
-        mywait();
+//        mywait();
         json_str = shou();
         t = from_json<fsearch2>(json_str);
         if(t.state == STATE_YES){
@@ -831,7 +861,7 @@ void fapplication(){
     p = {STATE_FAPPLICATION1,myid};
     json_str = to_json(p);
     fa(json_str);
-    mywait();
+//    mywait();
     json_str = shou();
     t = from_json<fapplication2>(json_str);
     std::cout << '\n' << "好友申请:";
@@ -859,6 +889,7 @@ void fapplication(){
         m = 0;
     }
     p1.state = STATE_FAPPLICATION3;
+    p1.cid = myid;
     json_str = to_json(p1);
     fa(json_str);
     std::cout << std::endl;
@@ -876,7 +907,7 @@ void gchat(){
     p1 = {STATE_GLIST1};
     json_str = to_json(p1);
     fa(json_str);
-    mywait();
+//    mywait();
     json_str = shou();
     t = from__json<fgroup>(json_str);
     for(const auto& fgroup : t){
@@ -891,6 +922,7 @@ void gchat(){
             break;
         for(const auto& str : t){
             if(gid == str.gid){
+                ggid = gid;
                 m = 1;
                 p.gid = gid;
                 std::cout<< '\n' << "开始聊天:(输入“退出退出退出”离开和此群聊天界面)";
@@ -900,6 +932,7 @@ void gchat(){
                         break;
                     p.gchat.push_back(gettime()+=gchat);
                 }
+                ggid = "退出退出退出!";
                 break;
             }
         }
@@ -927,7 +960,7 @@ void gsendfile(){
     p1 = {STATE_GLIST1};
     json_str = to_json(p1);
     fa(json_str);
-    mywait();
+//    mywait();
     json_str = shou();
     t = from__json<fgroup>(json_str);
     for(const auto& fgroup : t){
@@ -983,7 +1016,7 @@ void ghistory(){
         p = {STATE_GHISTORY1,myid,gid};
         json_str = to_json(p);
         fa(json_str);
-        mywait();
+//        mywait();
         json_str = shou();
         t = from_json<ghistory2>(json_str);
         if(t.state == STATE_YES)
@@ -1014,7 +1047,7 @@ void gfilehistory(){
     p1 = {STATE_GLIST1};
     json_str = to_json(p1);
     fa(json_str);
-    mywait();
+//    mywait();
     json_str = shou();
     t = from__json<fgroup>(json_str);
     for(const auto& fgroup : t){
@@ -1038,7 +1071,7 @@ void gfilehistory(){
             p2.state = STATE_GFILEHISTORY1;
             json_str = to_json(p);
             fa(json_str);
-            mywait();
+//            mywait();
             json_str = shou();
             p = from__json<gfilehistory2>(json_str);
             std::cout;
@@ -1060,7 +1093,7 @@ void gcreation(){
         p = {STATE_GCREATION1,myid,gid};
         json_str = to_json(p);
         fa(json_str);
-        mywait();
+//        mywait();
         json_str = shou();
         t = from_json<yesorno>(json_str);
         if(t.state == STATE_YES)
@@ -1083,7 +1116,7 @@ void gdissolution(){
     p = {STATE_GDISSOLUTION1,myid,gid};
     json_str = to_json(p);
     fa(json_str);
-    mywait();
+//    mywait();
     json_str = shou();
     t = from_json<yesorno>(json_str);
     if(t.state == STATE_YES)
@@ -1107,7 +1140,7 @@ void gapplication(){
     p = {STATE_GAPPLICATION1,myid,gid};
     json_str = to_json(p);
     fa(json_str);
-    mywait();
+//    mywait();
     json_str = shou();
     t = from_json<yesorno>(json_str);
     if(t.state == STATE_YES)
@@ -1130,7 +1163,7 @@ void gexit(){
     p = {STATE_GEXIT1,myid,gid};
     json_str = to_json(p);
     fa(json_str);
-    mywait();
+//    mywait();
     json_str = shou();
     t = from_json<yesorno>(json_str);
     if(t.state == STATE_YES)
@@ -1158,7 +1191,7 @@ void addmanager(){
     p = {STATE_ADDMANAGER1,myid,gid,id};
     json_str = to_json(p);
     fa(json_str);
-    mywait();
+//    mywait();
     json_str = shou();
     t = from_json<yesorno>(json_str);
     if(t.state == STATE_YES)
@@ -1187,7 +1220,7 @@ void delmanager(){
     p = {STATE_DELMANAGER1,myid,gid,id};
     json_str = to_json(p);
     fa(json_str);
-    mywait();
+//    mywait();
     json_str = shou();
     t = from_json<yesorno>(json_str);
     if(t.state == STATE_YES)
@@ -1206,39 +1239,70 @@ void delmanager(){
 void examine(){
     std::string json_str;
     examine1 p;
-    examine2 t;
-    examine3 p1;
+    std::vector<examine2> t;
+    std::vector<examine3> p1;
+    examine3 p2;
     std::string id;
-    int m = 0;
+    std::string gid;
+    int n = 0,q = 0,r = 0;
     p = {STATE_EXAMINE1,myid};
     json_str = to_json(p);
     fa(json_str);
-    mywait();
+//    mywait();
     json_str = shou();
-    t = from_json<examine2>(json_str);
-    std::cout << "加群申请:";
-    for(const auto& str : t.id){
-        std::cout << '\n' << str ;
+    t = from__json<examine2>(json_str);
+    std::cout << '\n' << "加群申请:";
+    for(const auto& examine2 : t){
+        std::cout << '\n' << "gid:" << examine2.gid << '\n' << "id:";
+        for(const auto& str : examine2.id)
+            std::cout << '\n' << str;
     }
     std::cout << std::endl;
     while(1){
-        std::cout << "输入你同意的用户的id:(输入“退出退出退出”离开此界面)";
-        std::cin >> id;
-        if(id == "退出退出退出")
+        std::cout << '\n' << "输入你要审核的群聊的gid:(输入“退出退出退出”离开此界面)";
+        std::cin >> gid;
+        if(gid == "退出退出退出")
             break;
-        for(const auto& str : t.id){
-            if(id == str)
-                m = 1;
+        for(const auto& examine2 : t){
+            if(gid == examine2.gid){
+                while(1){
+                    std::cout << '\n' << "输入你要同意进入该群聊的用户的id:(输入“退出退出退出”离开此群聊审核界面)";
+                    std::cin >> id;
+                    if(id == "退出退出退出")
+                        break;
+                    for(const auto& str : examine2.id){
+                        if(id == str){
+                            n = 1;
+                            q = 1;
+                            break;
+                        }
+                    }
+                    if(q)
+                        p2.id.push_back(id);
+                    else
+                        std::cout << '\n' << "该用户不在列表中!";
+                    q = 0;
+                }
+                if(n){
+                    p2.gid = gid;
+                    p2.state = STATE_EXAMINE3;
+                    p2.cid = myid;
+                }
+                break;
+            }
         }
-        if(m)
-            p1.id.push_back(id);
-        else
-            std::cout << '\n' << "该用户不在列表中!";
-        m = 0;
+        if(n){
+            p1.push_back(p2);
+            r = 1;
+            n = 0;
+            memset(&p2,0,sizeof(examine3));
+        }
     }
-    p1.state = STATE_EXAMINE3;
-    json_str = to_json(p1);
-    fa(json_str);
+    if(r){
+        json_str = to_json(p1);
+        fa(json_str);
+    }
+    std::cout << std::endl;
 }
 
 void delmember(){
@@ -1257,7 +1321,7 @@ void delmember(){
         p = {STATE_DELMEMBER1,myid,gid,id};
         json_str = to_json(p);
         fa(json_str);
-        mywait();
+//        mywait();
         json_str = shou();
         t = from_json<yesorno>(json_str);
         if(t.state == STATE_YES)
