@@ -1,84 +1,30 @@
 #include "ser.hpp"
-struct Person {
-    std::string name;
-    int age;
-    std::vector<std::string> kj;
-};
-
-// 将结构体序列化为 JSON 字符串
-std::string to_json(const Person& person) {
-    json j = {
-        {"name", person.name},
-        {"age", person.age},
-        {"kj", person.kj}
-    };
-    return j.dump();
-}
-
-// 从 JSON 字符串反序列化为结构体
-Person from_json(const std::string& json_str) {
-    json j = json::parse(json_str);
-    Person person;
-    person.name = j["name"].get<std::string>();
-    person.age = j["age"].get<int>();
-    person.kj = j["kj"].get<std::vector<std::string>>();
-    return person;
-}
-void to__json(const Person& s,json& j){
-    j = json{{"name",s.name},{"age",s.age},{"kj",s.kj}};
-}
-void from__json(const json& j,Person& s){
-    j.at("name").get_to(s.name);
-    j.at("age").get_to(s.age);
-    j.at("kj").get_to(s.kj);
-}
-/*
-void run(std::string json_str);
+#include "ser.cpp"
 
 std::mutex mtx;
-
+//mtx.lock();mtx.unlock();
 void th(){
     struct epoll_event events;
-    mtx.lock();
     int m = epoll_wait(epoll_fd, &events, 1, -1);
-    mtx.unlock();
     char buffer[BUFFER_SIZE];
     std::string json_str;
-    ssize_t bytes_read = read(events.data.fd, buffer, BUFFER_SIZE);
+    ssize_t bytes_read = recv(events.data.fd, buffer, BUFFER_SIZE,0);
     if (bytes_read == -1) {
         std::cerr << "Failed to read from socket." << std::endl;
         exit(1);
     }
     json_str+=buffer;
-    run(json_str);
+    run(json_str,events.data.fd);
 }
-*/
+
 int main(){
-    Person a,b,c;
-    json aa;
-    std::string m = "dsouihgf";
-    std::string n ="sdiuygf";
-    std::string json_str;
-    a.age = 1;
-    a.name = m;
-    a.kj.push_back(m);
-    a.kj.push_back(n);
-    json_str = to_json(a);
-    b = from_json(json_str);
-    std::cout << b.age << b.name;
-    for(const auto& ff:b.kj){
-        std::cout << '\n' << ff;
+
+    rediss = redisConnect("127.0.0.1", 6379);
+    if (rediss == nullptr || rediss->err) {
+        std::cerr << "Failed to connect to Redis: " << (rediss ? rediss->errstr : "can't allocate redis rediss") << std::endl;
+        return 1;
     }
-    to__json(a,aa);
-    from__json(aa,c);
-    std::cout << c.age << c.name;
-    for(const auto& ff:c.kj){
-        std::cout << '\n' << ff;
-    }
-    //json_str = to_json(a);
-    //b = from_json<Person>(json_str);
-    //std::cout << b.age << b.name;
-/*
+
     int server_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (server_socket == -1) {
         std::cerr << "Failed to create socket." << std::endl;
@@ -128,5 +74,4 @@ int main(){
             return 1;
         }
     }
-    */
 }

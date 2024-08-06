@@ -29,16 +29,14 @@ using json = nlohmann::json;
 #define BUFFER_SIZE 1024
 #define IP "209.141.34.136"
 
-//extern int epoll_fd;
-//extern int epoll_fd1;
-extern int client_socket;
-extern int client_socket1;
-extern std::string myid;
-extern std::string ccid;
-extern std::string ggid;
+int client_socket; 
+int client_socket1;
+std::string myid;
+std::string ccid;
+std::string ggid;
 
 enum {
-    STATE_NONE = 0,
+    STATE_NONE = 10,
     STATE_REGISTER1,
     STATE_REGISTER2,
     STATE_LOG_ON,
@@ -55,6 +53,8 @@ enum {
     STATE_FADD1,
     STATE_FDEL1,
     STATE_FBLOCK1,
+    STATE_FUNBLOCK1,
+    STATE_FUNBLOCK3,
     STATE_FSEARCH1,
     STATE_FSEARCH2,
     STATE_FAPPLICATION1,
@@ -74,7 +74,6 @@ enum {
     STATE_EXAMINE1,
     STATE_EXAMINE3,
 
-
     STATE_CFAPPLICATION,
     STATE_CFCHAT,
     STATE_CFFILE,
@@ -82,32 +81,7 @@ enum {
     STATE_CGCHAT,
     STATE_CGFILE,
 
-
-    STATE_FRIENDS,
-    STATE_FRI_CHAT,
-    STATE_FRI_FILE,
-    STATE_FRI_CHAT_H,
-    STATE_FRI_FILE_H,
-    STATE_FRI_ADD,
-    STATE_FRI_DEL,
-    STATE_FRI_SHIELD,
-    STATE_FRI_SER,
-    STATE_FRI_APPLY,
-    STATE_GROUPS,
-    STATE_GRO_CHAT,
-    STATE_GRO_FILE,
-    STATE_GRO_CHAT_H,
-    STATE_GRO_FILE_H,
-    STATE_GRO_CREATE,
-    STATE_GRO_DIS,
-    STATE_GRO_IN,
-    STATE_GRO_OFF,
-    STATE_GRO_ADD_MA,
-    STATE_GRO_DEL_MA,
-    STATE_GRO_EX,
-    STATE_GRO_DEL_ME,
-
-
+    STATE_TOOCLIENT1,
     STATE_ARELEADER,
     STATE_NOPOWER,
     STATE_GNOEXIT,
@@ -116,7 +90,11 @@ enum {
     STATE_NOGROUP,
     STATE_HAVEDONE,
     STATE_YES,
-    STATE_NO
+    STATE_NO,
+    STATE_ON,
+    STATE_OUT,
+    STATE_BLOCK,
+    STATE_UNBLOCK
 };
 
 std::string gettime();
@@ -143,6 +121,7 @@ void ffilehistory();
 void fadd();
 void fdel();
 void fblock();
+void funblock();
 void fsearch();
 void fapplication();
 void gchat();
@@ -259,6 +238,18 @@ struct fblock1{
     std::string cid;
     std::string id;
 };
+struct funblock1{
+    int state;
+    std::string cid;
+};
+struct funblock2{
+    std::vector<std::string> id;
+};
+struct funblock3{
+    int state;
+    std::string cid;
+    std::vector<std::string> id;
+};
 struct fsearch1{
     int state;
     std::string cid;
@@ -371,5 +362,8 @@ struct cshou{
     std::string did;
     std::string gid;
 };
-
-#endif
+struct tooclient{
+    int state;
+    std::string cid;
+};
+#endif 

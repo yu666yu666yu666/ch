@@ -1,5 +1,5 @@
-#ifndef __PROTO_H__
-#define __PROTO_H__
+#ifndef __SER_HPP__
+#define __SER_HPP__
 
 #include <iostream>
 #include <string.h>
@@ -28,16 +28,12 @@ using json = nlohmann::json;
 #define MAX_EVENTS 1024
 #define BUFFER_SIZE 1024
 #define IP "209.141.34.136"
-//#define FMT_STAMP "%lld\r\n" // 格式化参数
 
-extern int epoll_fd;
-extern int epoll_fd1;
-extern int client_socket;
-extern int client_socket1;
-extern std::string myid;
+redisContext* rediss;
+int epoll_fd;
 
 enum {
-    STATE_NONE = 0,
+    STATE_NONE = 10,
     STATE_REGISTER1,
     STATE_REGISTER2,
     STATE_LOG_ON,
@@ -54,6 +50,8 @@ enum {
     STATE_FADD1,
     STATE_FDEL1,
     STATE_FBLOCK1,
+    STATE_FUNBLOCK1,
+    STATE_FUNBLOCK3,
     STATE_FSEARCH1,
     STATE_FSEARCH2,
     STATE_FAPPLICATION1,
@@ -73,112 +71,99 @@ enum {
     STATE_EXAMINE1,
     STATE_EXAMINE3,
 
+    STATE_CFAPPLICATION,
+    STATE_CFCHAT,
+    STATE_CFFILE,
+    STATE_CGAPPLICATION,
+    STATE_CGCHAT,
+    STATE_CGFILE,
 
-
-
-
-
-    STATE_FRIENDS,
-    STATE_FRI_CHAT,
-    STATE_FRI_FILE,
-    STATE_FRI_CHAT_H,
-    STATE_FRI_FILE_H,
-    STATE_FRI_ADD,
-    STATE_FRI_DEL,
-    STATE_FRI_SHIELD,
-    STATE_FRI_SER,
-    STATE_FRI_APPLY,
-    STATE_GROUPS,
-    STATE_GRO_CHAT,
-    STATE_GRO_FILE,
-    STATE_GRO_CHAT_H,
-    STATE_GRO_FILE_H,
-    STATE_GRO_CREATE,
-    STATE_GRO_DIS,
-    STATE_GRO_IN,
-    STATE_GRO_OFF,
-    STATE_GRO_ADD_MA,
-    STATE_GRO_DEL_MA,
-    STATE_GRO_EX,
-    STATE_GRO_DEL_ME,
-
-
+    STATE_TOOCLIENT1,
+    STATE_ARELEADER,
+    STATE_NOPOWER,
     STATE_GNOEXIT,
     STATE_FNOEXIT,
     STATE_NOFRIEND,
     STATE_NOGROUP,
     STATE_HAVEDONE,
     STATE_YES,
-    STATE_NO
+    STATE_NO,
+    STATE_ON,
+    STATE_OUT,
+    STATE_BLOCK,
+    STATE_UNBLOCK
 };
 
-//void run(int client_socket);
-void fa(std::string json_str);
-std::string shou();
-void mywait();
-std::string gettime();
-void begin1();
-void begin2();
-void begin3();
-void begin4();
-void flist();
-void begin5();
-void begin6();
-void glist();
-void begin7();
-void begin8();
-void fchat();
-void fsendfile();
-void fhistory();
-void ffilehistory();
-void fadd();
-void fdel();
-void fblock();
-void fsearch();
-void fapplication();
-void gchat();
-void gsendfile();
-void ghistory();
-void gfilehistory();
-void gcreation();
-void gdissolution();
-void gapplication();
-void gexit();
-void addmanager();
-void delmanager();
-void examine();
-void delmember();
+void tooclient1s(std::string,int);
+void fhistory1s(std::string,int);
+void ghistory1s(std::string,int);
+void pregister1s(std::string,int);
+void pregister2s(std::string,int);
+void logons(std::string,int);
+void forget1s(std::string,int);
+void forget2s(std::string);
+void logoffs(std::string,int);
+void flist1s(std::string,int);
+void glist1s(std::string,int);
+void fchat1s(std::string);
+void fsendfile1s(std::string);
+void ffilehistory1s(std::string);
+void fadd1s(std::string,int);
+void fdel1s(std::string,int);
+void fblock1s(std::string,int);
+void funblock1s(std::string,int);
+void funblock3s(std::string);
+void fsearch1s(std::string,int);
+void fapplication1s(std::string,int);
+void fapplication3s(std::string);
+void gchat1s(std::string);
+void gsendfile1s(std::string);
+void gfilehistory1s(std::string);
+void gcreation1s(std::string,int);
+void gdissolution1s(std::string,int);
+void gapplication1s(std::string,int);
+void gexit1s(std::string,int);
+void addmanager1s(std::string,int);
+void delmanager1s(std::string,int);
+void examine1s(std::string,int);
+void examine3s(std::string);
+void delmember1s(std::string,int);
 
+struct tfile{
+    std::string filename;
+    std::size_t filesize;
+    std::vector<char> content;
+};
 struct pregister1{
     int state;
-    std::string id;
+    std::string cid;
 };
 struct pregister2{
     int state;
-    std::string id;
+    std::string cid;
     std::string password;
     std::string problem;
     std::string awswer;
 };
 struct logon{
     int state;
-    std::string id;
+    std::string cid;
     std::string password;
 };
 struct forget1{
     int state;
-    std::string id;
+    std::string cid;
     std::string problem;
     std::string awswer;
 };
 struct forget2{
     int state;
-    std::string id;
+    std::string cid;
     std::string password;
 };
 struct logoff{
     int state;
-    std::string id;
+    std::string cid;
     std::string password;
 };
 struct yesorno{
@@ -186,9 +171,11 @@ struct yesorno{
 };
 struct flist1{
     int state;
+    std::string cid;
 };
 struct glist1{
     int state;
+    std::string cid;
 };
 struct ffriend{
     int ustate;
@@ -202,11 +189,13 @@ struct fgroup{
 };
 struct fchat1{
     int state;
+    std::string cid;
     std::string id;
-    std::vector<std::string> chat;
+    std::string chat;
 };
 struct fhistory1{
     int state;
+    std::string cid;
     std::string id;
 };
 struct fhistory2{
@@ -215,6 +204,7 @@ struct fhistory2{
 };
 struct fsendfile1{
     int state;
+    std::string cid;
     std::string id;
     std::string filename;
     std::size_t filesize;
@@ -222,6 +212,7 @@ struct fsendfile1{
 };
 struct ffilehistory1{
     int state;
+    std::string cid;
     std::string id;
 };
 struct ffilehistory2{
@@ -231,14 +222,34 @@ struct ffilehistory2{
 };
 struct fadd1{
     int state;
+    std::string cid;
     std::string id;
 };
 struct fdel1{
     int state;
+    std::string cid;
     std::string id;
+};
+struct fblock1{
+    int state;
+    std::string cid;
+    std::string id;
+};
+struct funblock1{
+    int state;
+    std::string cid;
+};
+struct funblock2{
+    std::vector<std::string> id;
+};
+struct funblock3{
+    int state;
+    std::string cid;
+    std::vector<std::string> id;
 };
 struct fsearch1{
     int state;
+    std::string cid;
     std::string id;
 };
 struct fsearch2{
@@ -248,21 +259,25 @@ struct fsearch2{
 };
 struct fapplication1{
     int state;
+    std::string cid;
 };
 struct fapplication2{
     std::vector<std::string> id;
 };
 struct fapplication3{
     int state;
+    std::string cid;
     std::vector<std::string> id;
 };
 struct gchat1{
     int state;
+    std::string cid;
     std::string gid;
-    std::vector<std::string> gchat;
+    std::string gchat;
 };
 struct ghistory1{
     int state;
+    std::string cid;
     std::string gid;
 };
 struct ghistory2{
@@ -271,6 +286,7 @@ struct ghistory2{
 }; 
 struct gsendfile1{
     int state;
+    std::string cid;
     std::string gid;
     std::string filename;
     std::size_t filesize;
@@ -278,6 +294,7 @@ struct gsendfile1{
 };
 struct gfilehistory1{
     int state;
+    std::string cid;
     std::string gid;
 };
 struct gfilehistory2{
@@ -287,96 +304,100 @@ struct gfilehistory2{
 };
 struct gcreation1{
     int state;
+    std::string cid;
     std::string gid;
 };
 struct gdissolution1{
     int state;
+    std::string cid;
     std::string gid;
 };
 struct gapplication1{
     int state;
+    std::string cid;
     std::string gid;
 };
 struct gexit1{
     int state;
+    std::string cid;
     std::string gid;
 };
 struct addmanager1{
     int state;
+    std::string cid;
     std::string gid;
     std::string id;
 };
 struct delmanager1{
     int state;
+    std::string cid;
     std::string gid;
     std::string id;
 };
 struct delmember1{
     int state;
+    std::string cid;
     std::string gid;
     std::string id;
 };
 struct examine1{
     int state;
+    std::string cid;
 };
 struct examine2{
+    std::string gid;
     std::vector<std::string> id;
 };
 struct examine3{
     int state;
+    std::string cid;
+    std::string gid;
     std::vector<std::string> id;
 };
-struct tfile{
-    std::string filename;
-    std::size_t filesize;
-    std::vector<char> content;
+struct cshou{
+    int state;
+    std::string did;
+    std::string gid;
 };
-/*
-class personmod{
-
-    init_person();
-    mod_person();
-    del_person();
-
+struct tooclient{
+    int state;
+    std::string cid;
 };
-
-class person{
-    struct pperson{
-        std::string id;
-        std::string password;
-        std::string problem;
-        std::string awswer;
-        int ustate;
-        std::vector<pfriend> friends;
-        std::vector<std::string> groups;
-        sockaddr_in addr1 addr2;
-        //int WORKSTATE;
-        std::vector<std::string> applications;
-    }[];
-
+struct pperson{
+    std::string id;
+    std::string password;
+    std::string problem;
+    std::string awswer;
+    int fd1;
+    int fd2;
+    int ustate;
+    std::vector<std::string> friendid;
+    std::vector<int> co_state;
+    std::vector<std::string> groups;
+    std::vector<std::string> applications;
 };
 
-struct pfriend{
+struct pfriend{//pp
     std::string id;
     int co_state;//communication status
 };
-struct pgroup{
+struct pgroup{//gg
     std::string gid;
     std::string g_leader;
     std::vector<std::string> manager;
     std::vector<std::string> member;
     std::vector<std::string> examine;
-}[];
-struct historys{
+};
+struct historys{//hh
     std::string id1;
     std::string id2;
     std::vector<std::string> chathistory;
-    fire[];
-}[];
-struct ghistorys{
-    std::string gid;
+    //fire[];
+};
+struct ghistorys{//gh
+    std::string gid;//ghid  gid+"g"
     std::vector<std::string> chatghistory;
-    fire[];
-}[];
-*/
-#endif
+    //fire[];
+};
+
+#endif 
