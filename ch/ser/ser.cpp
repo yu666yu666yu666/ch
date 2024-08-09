@@ -5,13 +5,14 @@ void run(std::string json_str,int client){
     //char b = json_str[json_str.find(':')+2];
     //std::string sstate = {json_str[json_str.find(':')+1],json_str[json_str.find(':')+2]};
     //int state = std::stoi(sstate);
+    std::cout <<"run ok" <<std::endl;
     int state;
     std::size_t colon_pos = json_str.find(':');
     if (colon_pos != std::string::npos && colon_pos + 2 < json_str.length()) {
         std::string sstate = json_str.substr(colon_pos + 1, 2);
         state = std::stoi(sstate);
     }
-
+    std::cout <<state<<std::endl;
     switch (state)
     {
         
@@ -90,20 +91,29 @@ void run(std::string json_str,int client){
         break;
     }
     struct epoll_event event;
-    event.events = EPOLLIN | EPOLLET;
+    
+    std::cout << "end"<< std::endl;
+    
     event.data.fd = client;
+    event.events = EPOLLIN | EPOLLET;
 
-    if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, event.data.fd, &event) == -1)
-    {
+    fcntl(client, F_SETFL, fcntl(client, F_GETFD, 0) | O_NONBLOCK);
+
+    if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client, &event) < 0) {
         perror("epoll_ctl");
+        close(client);
     }
+    else
+        std::cout << "readd ok"<<std::endl;
 }
 
 void fa(std::string jsonstr,int client){
-    if (send(client, jsonstr.c_str(), jsonstr.length(),0) == -1) {
+    if (send(client, jsonstr.c_str(), jsonstr.length(),0) < 0) {
         std::cerr << "Failed to send to socket." << std::endl;
         exit(1);
     }
+    else
+        std::cout <<"send ok"<< std::endl;
 }
 
 void tooclient1s(std::string json_str,int client){
@@ -284,6 +294,7 @@ void ghistory1s(std::string json_str,int client){
 }
 
 void pregister1s(std::string json_str,int client){
+    std::cout << "register"<<std::endl;
     pregister1 p;
     json j;
     yesorno t;

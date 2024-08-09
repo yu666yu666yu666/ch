@@ -25,7 +25,7 @@
 #include "/home/yu666/Desktop/ch/json/single_include/nlohmann/json.hpp"
 using json = nlohmann::json;
 
-#define SERVER_PORT 8000
+#define SERVER_PORT 8888
 #define MAX_EVENTS 1024
 #define BUFFER_SIZE 1024
 #define IP "127.0.0.1"

@@ -9,14 +9,14 @@ std::string gettime(){
 }
 
 void fa(std::string json_str){
-    if (send(client_socket, json_str.c_str(), json_str.length(),0) == -1) {
+    if (send(client_socket, json_str.c_str(), json_str.length(),0) < 0) {
         std::cerr << "Failed to send to socket." << std::endl;
         exit(1);
     }
 }
 
 void fa1(std::string json_str){
-    if (send(client_socket1, json_str.c_str(), json_str.length(),0) == -1) {
+    if (send(client_socket1, json_str.c_str(), json_str.length(),0) < 0) {
         std::cerr << "Failed to send to socket." << std::endl;
         exit(1);
     }
@@ -54,7 +54,8 @@ std::string shou() {
     while(1){
         bytes_read = recv(client_socket,buffer,sizeof(buffer),0);
         if(bytes_read <= 0){
-            std::cout <<"err";
+            //std::cout <<"err";
+            //perror("recv");
             break;
         }
         json_str += std::string(buffer,bytes_read);
@@ -201,6 +202,7 @@ void begin1(){
             fa(json_str);
 //            mywait();
             json_str = shou();
+            std::cout <<json_str<<std::endl;
             //t = from_json<yesorno>(json_str);
             j = json::parse(json_str);
             t.state = j["1"].get<int>();
