@@ -42,7 +42,7 @@ int main(){
         return 1;
     }
 
-    int epoll_fd = epoll_create1(0);
+    epoll_fd = epoll_create1(0);
     if (epoll_fd == -1) {
         std::cerr << "Failed to create epoll instance." << std::endl;
         return 1;
@@ -121,7 +121,8 @@ int mm = 0;
 
                 if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, event.data.fd, 0) < 0)
                 {
-                    perror("Epoll_ctl-DEL failed");
+                    //perror("Epoll_ctl-DEL failed");
+                    perror("epoll_ctl");
                     exit(EXIT_FAILURE);
                 }
                 else

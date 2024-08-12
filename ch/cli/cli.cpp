@@ -59,6 +59,8 @@ std::string shou() {
             break;
         }
         json_str += std::string(buffer,bytes_read);
+        if(bytes_read < sizeof(buffer))
+            break;
     }
     return json_str;
 /*
@@ -78,16 +80,28 @@ std::string shou1() {
     std::string json_str;
     ssize_t bytes_read;
 
+    while(1){
+        bytes_read = recv(client_socket1,buffer,sizeof(buffer),0);
+        if(bytes_read <= 0){
+            //std::cout <<"err";
+            //perror("recv");
+            break;
+        }
+        json_str += std::string(buffer,bytes_read);
+        if(bytes_read < sizeof(buffer))
+            break;
+    }
+    return json_str;
+/*
     do {
-        bytes_read = read(client_socket1, buffer, BUFFER_SIZE);
+        bytes_read = read(client_socket, buffer, BUFFER_SIZE);
         if (bytes_read == -1) {
             std::cerr << "Failed to read from socket." << std::endl;
             exit(1);
         }
         json_str += buffer;
     } while (bytes_read == BUFFER_SIZE);
-
-    return json_str;
+*/    
 }
 
 void b_thread_function(){
@@ -202,7 +216,6 @@ void begin1(){
             fa(json_str);
 //            mywait();
             json_str = shou();
-            std::cout <<json_str<<std::endl;
             //t = from_json<yesorno>(json_str);
             j = json::parse(json_str);
             t.state = j["1"].get<int>();
@@ -607,7 +620,11 @@ void flist(){
         t.push_back(t1);
     }
     for(const auto& ffriend : t){
-        std::cout << '\n' << "id:" << ffriend.id << ",state:" << ffriend.ustate;
+        std::cout << '\n' << "id:" << ffriend.id << ",state:";
+        if(ffriend.ustate == STATE_ON)
+            std::cout << "在线";
+        else
+            std::cout << "离线";
     }
     std::cout << std::endl;
 }
@@ -1138,6 +1155,8 @@ void fapplication(){
             std::cout << '\n' << "该用户不在申请列表中!" << '\n';
         m = 0;
     }
+    if(p1.id.empty())
+        return;
     p1.state = STATE_FAPPLICATION3;
     p1.cid = myid;
     //json_str = to_json(p1);

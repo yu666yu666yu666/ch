@@ -103,7 +103,7 @@ std::string shou();
 std::string shou1();
 //void mywait();
 std::string gettime();
-void* b_thread_function(void*);
+//void* b_thread_function(void*);
 void begin1();
 void begin2();
 void begin3();

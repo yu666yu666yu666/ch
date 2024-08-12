@@ -35,8 +35,8 @@ int main(int argc,char* argv[]) {
     myid.clear();
 
     begin1();
-    
-    std::thread(b_thread_function);
+
+    std::thread t(b_thread_function);
 
     begin2();
 }

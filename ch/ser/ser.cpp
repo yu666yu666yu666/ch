@@ -15,19 +15,16 @@ void run(std::string json_str,int client){
     std::cout <<state<<std::endl;
     switch (state)
     {
-        
     case STATE_TOOCLIENT1: tooclient1s(json_str,client);
         break;
     case STATE_FHISTORY1: fhistory1s(json_str,client);
         break;
     case STATE_GHISTORY1: ghistory1s(json_str,client);
         break;
-        
     case STATE_REGISTER1: pregister1s(json_str,client);
         break;
     case STATE_REGISTER2: pregister2s(json_str,client);
         break;
-        
     case STATE_LOG_ON: logons(json_str,client);
         break;
     case STATE_FORGET1: forget1s(json_str,client);
@@ -121,10 +118,11 @@ void tooclient1s(std::string json_str,int client){
     json j;
     std::string jsonstr;
     pperson pp;
+    unonline un;
     j = json::parse(json_str);
     p.state = j["1"].get<int>();
     p.cid = j["2"].get<std::string>();
-    redisReply* reply = (redisReply*)redisCommand(rediss, "EXISTS %s", p.cid);
+    redisReply* reply = (redisReply*)redisCommand(rediss, "EXISTS %s", p.cid.c_str());
     if(reply == nullptr){
         exit(1);
     }
@@ -132,7 +130,7 @@ void tooclient1s(std::string json_str,int client){
         if(reply->type == REDIS_REPLY_INTEGER){
             if(reply->integer == 1){//zai
                 //qu cun
-                redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", p.cid);
+                redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", p.cid.c_str());
                 jsonstr = reply1->str;
                 j = json::parse(jsonstr);
                 pp.id = j["1"].get<std::string>();
@@ -150,7 +148,23 @@ void tooclient1s(std::string json_str,int client){
                     {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
                 };
                 jsonstr = j.dump();
-                redisReply* reply2 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id, jsonstr.c_str());
+                redisReply* reply2 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id.c_str(), jsonstr.c_str());
+
+                sleep(1);
+                std::string unid = "un" + p.cid;
+                    reply1 = (redisReply*)redisCommand(rediss, "GET %s ", unid.c_str());
+                    jsonstr = reply1->str;
+                    j = json::parse(jsonstr);
+                    un.un = j["1"].get<std::vector<json>>();
+                    for(const auto& u : un.un){
+                        jsonstr = u.dump();
+                        fa(jsonstr,pp.fd2);
+                    }
+                    un.un.clear();
+                    j = {{"1", un.un}};
+                    jsonstr = j.dump();
+                    reply = (redisReply*)redisCommand(rediss, "SET %s %s", unid.c_str(), jsonstr.c_str());
+
                 freeReplyObject(reply1);
                 freeReplyObject(reply2);
             }
@@ -172,14 +186,14 @@ void fhistory1s(std::string json_str,int client){
     p.id = j["3"].get<std::string>();
     key1 = p.cid + p.id;
     key2 = p.id + p.cid;
-    redisReply* reply = (redisReply*)redisCommand(rediss, "EXISTS %s", key1);
+    redisReply* reply = (redisReply*)redisCommand(rediss, "EXISTS %s", key1.c_str());
     if(reply == nullptr){
         exit(1);
     }
     else{
         if(reply->type == REDIS_REPLY_INTEGER){
             if(reply->integer == 1){
-                redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", key1);
+                redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", key1.c_str());
                 jsonstr = reply1->str;
                 j = json::parse(jsonstr);
                 t.chathistory = j["3"].get<std::vector<std::string>>();
@@ -194,14 +208,14 @@ void fhistory1s(std::string json_str,int client){
         }
     }
 
-    reply = (redisReply*)redisCommand(rediss, "EXISTS %s", key2);
+    reply = (redisReply*)redisCommand(rediss, "EXISTS %s", key2.c_str());
     if(reply == nullptr){
         exit(1);
     }
     else{
         if(reply->type == REDIS_REPLY_INTEGER){
             if(reply->integer == 1){
-                redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", key2);
+                redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", key2.c_str());
                 jsonstr = reply1->str;
                 j = json::parse(jsonstr);
                 t.chathistory = j["3"].get<std::vector<std::string>>();
@@ -234,20 +248,20 @@ void ghistory1s(std::string json_str,int client){
     p.gid = j["3"].get<std::string>();
     std::string ghid;
     ghid = p.gid + 'g';
-    redisReply* reply = (redisReply*)redisCommand(rediss, "EXISTS %s", p.gid);
+    redisReply* reply = (redisReply*)redisCommand(rediss, "EXISTS %s", p.gid.c_str());
     if(reply == nullptr){
         exit(1);
     }
     else{
         if(reply->type == REDIS_REPLY_INTEGER){
             if(reply->integer == 1){
-                redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", p.gid);
+                redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", p.gid.c_str());
                 jsonstr = reply1->str;
                 j = json::parse(jsonstr);
                 gg.member = j["4"].get<std::vector<std::string>>();
                 gg.g_leader = j["2"].get<std::string>();
                 if(p.cid == gg.g_leader){
-                    reply1 = (redisReply*)redisCommand(rediss, "GET %s ", ghid);
+                    reply1 = (redisReply*)redisCommand(rediss, "GET %s ", ghid.c_str());
                     jsonstr = reply1->str;
                     j = json::parse(jsonstr);
                     t.chatghistory = j["2"].get<std::vector<std::string>>();
@@ -261,7 +275,7 @@ void ghistory1s(std::string json_str,int client){
                 }
                 for(const auto& tid : gg.member){
                     if(tid == p.cid){
-                        reply1 = (redisReply*)redisCommand(rediss, "GET %s ", ghid);
+                        reply1 = (redisReply*)redisCommand(rediss, "GET %s ", ghid.c_str());
                         jsonstr = reply1->str;
                         j = json::parse(jsonstr);
                         t.chatghistory = j["2"].get<std::vector<std::string>>();
@@ -302,7 +316,7 @@ void pregister1s(std::string json_str,int client){
     j = json::parse(json_str);
 //    p.state = j["1"].get<int>();
     p.cid = j["2"].get<std::string>();
-    redisReply* reply = (redisReply*)redisCommand(rediss, "EXISTS %s", p.cid);
+    redisReply* reply = (redisReply*)redisCommand(rediss, "EXISTS %s", p.cid.c_str());
     if(reply == nullptr){
         exit(1);
     }
@@ -345,12 +359,13 @@ void pregister2s(std::string json_str,int client){
         {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
     };
     jsonstr = j.dump();
-    redisReply* reply = (redisReply*)redisCommand(rediss, "SET %s %s", p.cid, jsonstr.c_str());
+    std::cout <<pp.id<< std::endl;
+    redisReply* reply = (redisReply*)redisCommand(rediss, "SET %s %s", p.cid.c_str(), jsonstr.c_str());
     unonline un;
     std::string unid = "un" + p.cid;
     j = {{"1",un.un}};
     jsonstr = j.dump();
-    reply = (redisReply*)redisCommand(rediss, "SET %s %s", unid, jsonstr.c_str());
+    reply = (redisReply*)redisCommand(rediss, "SET %s %s", unid.c_str(), jsonstr.c_str());
     freeReplyObject(reply);
 }
 
@@ -365,14 +380,14 @@ void logons(std::string json_str,int client){
 //    p.state = j["1"].get<int>();
     p.cid = j["2"].get<std::string>();
     p.password = j["3"].get<std::string>();
-    redisReply* reply = (redisReply*)redisCommand(rediss, "EXISTS %s", p.cid);
+    redisReply* reply = (redisReply*)redisCommand(rediss, "EXISTS %s", p.cid.c_str());
     if(reply == nullptr){
         exit(1);
     }
     else{
         if(reply->type == REDIS_REPLY_INTEGER){
             if(reply->integer == 1){//zai
-                redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", p.cid);
+                redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", p.cid.c_str());
                 jsonstr = reply1->str;
                 j = json::parse(jsonstr);
                 pp.password = j["2"].get<std::string>();
@@ -392,11 +407,13 @@ void logons(std::string json_str,int client){
                     j = {{"1", t.state}};
                     jsonstr = j.dump();
                     fa(jsonstr,client);
+                    /*
                     std::string unid = "un" + p.cid;
-                    reply1 = (redisReply*)redisCommand(rediss, "GET %s ", unid);
+                    reply1 = (redisReply*)redisCommand(rediss, "GET %s ", unid.c_str());
                     jsonstr = reply1->str;
                     j = json::parse(jsonstr);
                     un.un = j["1"].get<std::vector<json>>();
+                    std::cout <<pp.fd2<<std::endl;
                     for(const auto& u : un.un){
                         jsonstr = u.dump();
                         fa(jsonstr,pp.fd2);
@@ -404,7 +421,8 @@ void logons(std::string json_str,int client){
                     un.un.clear();
                     j = {{"1", un.un}};
                     jsonstr = j.dump();
-                    reply = (redisReply*)redisCommand(rediss, "SET %s %s", unid, jsonstr.c_str());
+                    reply = (redisReply*)redisCommand(rediss, "SET %s %s", unid.c_str(), jsonstr.c_str());
+                    */
                 }
                 else{
                     t.state = STATE_NO;
@@ -437,14 +455,14 @@ void forget1s(std::string json_str,int client){
     p.cid = j["2"].get<std::string>();
     p.problem = j["3"].get<std::string>();
     p.awswer = j["4"].get<std::string>();
-    redisReply* reply = (redisReply*)redisCommand(rediss, "EXISTS %s", p.cid);
+    redisReply* reply = (redisReply*)redisCommand(rediss, "EXISTS %s", p.cid.c_str());
     if(reply == nullptr){
         exit(1);
     }
     else{
         if(reply->type == REDIS_REPLY_INTEGER){
             if(reply->integer == 1){//zai
-                redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", p.cid);
+                redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", p.cid.c_str());
                 jsonstr = reply1->str;
                 j = json::parse(jsonstr);
                 pp.problem = j["3"].get<std::string>();
@@ -465,8 +483,9 @@ void forget1s(std::string json_str,int client){
                     j = {{"1", t.state}};
                     jsonstr = j.dump();
                     fa(jsonstr,client);
+                    /*
                     std::string unid = "un" + p.cid;
-                    reply1 = (redisReply*)redisCommand(rediss, "GET %s ", unid);
+                    reply1 = (redisReply*)redisCommand(rediss, "GET %s ", unid.c_str());
                     jsonstr = reply1->str;
                     j = json::parse(jsonstr);
                     un.un = j["1"].get<std::vector<json>>();
@@ -477,7 +496,8 @@ void forget1s(std::string json_str,int client){
                     un.un.clear();
                     j = {{"1", un.un}};
                     jsonstr = j.dump();
-                    reply = (redisReply*)redisCommand(rediss, "SET %s %s", unid, jsonstr.c_str());
+                    reply = (redisReply*)redisCommand(rediss, "SET %s %s", unid.c_str(), jsonstr.c_str());
+                    */
                 }
                 else{
                     t.state = STATE_NO;
@@ -507,7 +527,7 @@ void forget2s(std::string json_str){
 //    p.state = j["1"].get<int>();
     p.cid = j["2"].get<std::string>();
     p.password = j["3"].get<std::string>();
-    redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", p.cid);
+    redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", p.cid.c_str());
     jsonstr = reply1->str;
     j = json::parse(jsonstr);
     pp.id = j["1"].get<std::string>();
@@ -525,7 +545,7 @@ void forget2s(std::string json_str){
         {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
     };
     jsonstr = j.dump();
-    redisReply* reply2 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id, jsonstr.c_str());
+    redisReply* reply2 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id.c_str(), jsonstr.c_str());
     freeReplyObject(reply1);
     freeReplyObject(reply2);
 }
@@ -543,14 +563,14 @@ void logoffs(std::string json_str,int client){
     p.state = j["1"].get<int>();
     p.cid = j["2"].get<std::string>();
     p.password = j["3"].get<std::string>();
-    redisReply* reply = (redisReply*)redisCommand(rediss, "EXISTS %s", p.cid);
+    redisReply* reply = (redisReply*)redisCommand(rediss, "EXISTS %s", p.cid.c_str());
     if(reply == nullptr){
         exit(1);
     }
     else{
         if(reply->type == REDIS_REPLY_INTEGER){
             if(reply->integer == 1){//zai
-                redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", p.cid);
+                redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", p.cid.c_str());
                 jsonstr = reply1->str;
                 j = json::parse(jsonstr);
                 pp.password = j["2"].get<std::string>();
@@ -572,10 +592,10 @@ void logoffs(std::string json_str,int client){
                     jsonstr = j.dump();
                     fa(jsonstr,client);
                     std::string unid = "un" + p.cid;
-                    reply = (redisReply*)redisCommand(rediss, "DEL %s ", unid);
+                    reply = (redisReply*)redisCommand(rediss, "DEL %s ", unid.c_str());
 
                     for(const auto& tid : pp.friendid){
-                        reply1 = (redisReply*)redisCommand(rediss, "GET %s ", tid);
+                        reply1 = (redisReply*)redisCommand(rediss, "GET %s ", tid.c_str());
                         jsonstr = reply1->str;
                         j = json::parse(jsonstr);
                         pp1.id = j["1"].get<std::string>();
@@ -600,25 +620,25 @@ void logoffs(std::string json_str,int client){
                             {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
                         };
                         jsonstr = j.dump();
-                        reply = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id, jsonstr.c_str());
+                        reply = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id.c_str(), jsonstr.c_str());
 
                         key1 = p.cid + tid;
                         key2 = tid + p.cid;
-                        reply = (redisReply*)redisCommand(rediss, "EXISTS %s", key1);
+                        reply = (redisReply*)redisCommand(rediss, "EXISTS %s", key1.c_str());
                         if(reply == nullptr){
                             exit(1);
                         }
                         else{
                             if(reply->type == REDIS_REPLY_INTEGER){
                                 if(reply->integer == 1)
-                                    reply = (redisReply*)redisCommand(rediss, "DEL %s ", key1);
+                                    reply = (redisReply*)redisCommand(rediss, "DEL %s ", key1.c_str());
                                 else
-                                    reply = (redisReply*)redisCommand(rediss, "DEL %s ", key2);
+                                    reply = (redisReply*)redisCommand(rediss, "DEL %s ", key2.c_str());
                             }
                         }
                     }
                     for(const auto& tid : pp.groups){
-                        reply1 = (redisReply*)redisCommand(rediss, "GET %s ", tid);
+                        reply1 = (redisReply*)redisCommand(rediss, "GET %s ", tid.c_str());
                         jsonstr = reply1->str;
                         j = json::parse(jsonstr);
                         gg.gid = j["1"].get<std::string>();
@@ -628,7 +648,7 @@ void logoffs(std::string json_str,int client){
                         gg.examine = j["5"].get<std::vector<std::string>>();
                         if(p.cid == gg.g_leader){
                             for(const auto& ttid : gg.member){
-                                reply1 = (redisReply*)redisCommand(rediss, "GET %s ", ttid);
+                                reply1 = (redisReply*)redisCommand(rediss, "GET %s ", ttid.c_str());
                                 jsonstr = reply1->str;
                                 j = json::parse(jsonstr);
                                 pp1.id = j["1"].get<std::string>();
@@ -649,11 +669,11 @@ void logoffs(std::string json_str,int client){
                                     {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
                                 };
                                 jsonstr = j.dump();
-                                reply = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id, jsonstr.c_str());
+                                reply = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id.c_str(), jsonstr.c_str());
                             }
-                            reply = (redisReply*)redisCommand(rediss, "DEL %s ", tid);
+                            reply = (redisReply*)redisCommand(rediss, "DEL %s ", tid.c_str());
                             std::string ghid = tid + 'g';
-                            reply = (redisReply*)redisCommand(rediss, "DEL %s ", ghid);
+                            reply = (redisReply*)redisCommand(rediss, "DEL %s ", ghid.c_str());
                             continue;
                         }
                         for(const auto& ttid : gg.manager){
@@ -671,12 +691,12 @@ void logoffs(std::string json_str,int client){
                                     gg.member.erase(it);
                                 j = {{"1", gg.gid},{"2", gg.g_leader},{"3", gg.manager},{"4", gg.member},{"5", gg.examine}};
                                 jsonstr = j.dump();
-                                reply = (redisReply*)redisCommand(rediss, "SET %s %s", gg.gid, jsonstr.c_str());
+                                reply = (redisReply*)redisCommand(rediss, "SET %s %s", gg.gid.c_str(), jsonstr.c_str());
                                 break;
                             }
                         }
                     }
-                    reply = (redisReply*)redisCommand(rediss, "DEL %s ", p.cid);
+                    reply = (redisReply*)redisCommand(rediss, "DEL %s ", p.cid.c_str());
                     
                 }
                 else {
@@ -710,12 +730,12 @@ void flist1s(std::string json_str,int client) {
     j = json::parse(json_str);
     p.state = j["1"].get<int>();
     p.cid = j["2"].get<std::string>();
-    redisReply* reply = (redisReply*)redisCommand(rediss, "GET %s ", p.cid);
+    redisReply* reply = (redisReply*)redisCommand(rediss, "GET %s ", p.cid.c_str());
     jsonstr = reply->str;
     j = json::parse(jsonstr);
     pp.friendid = j["8"].get<std::vector<std::string>>();
     for(const auto& m : pp.friendid){
-        redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", m);
+        redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", m.c_str());
         p2.id = m;
         jsonstr2 = reply1->str;
         j = json::parse(jsonstr2);
@@ -743,12 +763,12 @@ void glist1s(std::string json_str ,int client){
     j = json::parse(json_str);
     p.state = j["1"].get<int>();
     p.cid = j["2"].get<std::string>();
-    redisReply* reply = (redisReply*)redisCommand(rediss, "GET %s ", p.cid);
+    redisReply* reply = (redisReply*)redisCommand(rediss, "GET %s ", p.cid.c_str());
     jsonstr = reply->str;
     j = json::parse(jsonstr);
     pp.groups = j["10"].get<std::vector<std::string>>();
     for(const auto& m : pp.groups){
-        redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", m);
+        redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", m.c_str());
         p2.gid = m;
         jsonstr2 = reply1->str;
         j = json::parse(jsonstr2);
@@ -782,7 +802,7 @@ void fchat1s(std::string json_str){
     p.cid = j["2"].get<std::string>();
     p.id = j["3"].get<std::string>();
     p.chat = j["4"].get<std::string>();
-    redisReply* reply = (redisReply*)redisCommand(rediss, "GET %s ", p.cid);
+    redisReply* reply = (redisReply*)redisCommand(rediss, "GET %s ", p.cid.c_str());
     jsonstr = reply->str;
     j = json::parse(jsonstr);
     pp.friendid = j["8"].get<std::vector<std::string>>();
@@ -791,7 +811,7 @@ void fchat1s(std::string json_str){
     int pos = std::distance(pp.friendid.begin(),it);
     if(pp.co_state[pos] == STATE_BLOCK)
         m = 1;
-    reply = (redisReply*)redisCommand(rediss, "GET %s ", p.id);
+    reply = (redisReply*)redisCommand(rediss, "GET %s ", p.id.c_str());
     jsonstr = reply->str;
     j = json::parse(jsonstr);
     pp.friendid = j["8"].get<std::vector<std::string>>();
@@ -808,14 +828,14 @@ void fchat1s(std::string json_str){
     }
     key1 = p.cid + p.id;
     key2 = p.id + p.cid;
-    reply = (redisReply*)redisCommand(rediss, "EXISTS %s", key1);
+    reply = (redisReply*)redisCommand(rediss, "EXISTS %s", key1.c_str());
     if(reply == nullptr){
         exit(1);
     }
     else{
         if(reply->type == REDIS_REPLY_INTEGER){
             if(reply->integer == 1){
-                reply = (redisReply*)redisCommand(rediss, "GET %s ", key1);
+                reply = (redisReply*)redisCommand(rediss, "GET %s ", key1.c_str());
                 jsonstr = reply->str;
                 j = json::parse(jsonstr);
                 hh.id1 = j["1"].get<std::string>();
@@ -824,7 +844,7 @@ void fchat1s(std::string json_str){
                 hh.chathistory.push_back(p.chat);
                 j = {{"1", hh.id1},{"2", hh.id2},{"3", hh.chathistory}};
                 jsonstr = j.dump();
-                reply = (redisReply*)redisCommand(rediss, "SET %s %s", key1, jsonstr.c_str());
+                reply = (redisReply*)redisCommand(rediss, "SET %s %s", key1.c_str(), jsonstr.c_str());
                 
                 tt.state = STATE_CFCHAT;
                 tt.did = p.cid;
@@ -835,20 +855,20 @@ void fchat1s(std::string json_str){
                     fa(jsonstr,pp.fd2);
                 else{
                     std::string unid = "un" + p.id;
-                    reply = (redisReply*)redisCommand(rediss, "GET %s ", unid);
+                    reply = (redisReply*)redisCommand(rediss, "GET %s ", unid.c_str());
                     jsonstr = reply->str;
                     j = json::parse(jsonstr);
                     un.un = j["1"].get<std::vector<json>>();
                     un.un.push_back(j1);
                     j = {{"1", un.un}};
                     jsonstr = j.dump();
-                    reply = (redisReply*)redisCommand(rediss, "SET %s %s", unid, jsonstr.c_str());
+                    reply = (redisReply*)redisCommand(rediss, "SET %s %s", unid.c_str(), jsonstr.c_str());
                 }
                 freeReplyObject(reply);
                 return;
             }
             else{
-                reply = (redisReply*)redisCommand(rediss, "GET %s ", key2);
+                reply = (redisReply*)redisCommand(rediss, "GET %s ", key2.c_str());
                 jsonstr = reply->str;
                 j = json::parse(jsonstr);
                 hh.id1 = j["1"].get<std::string>();
@@ -857,7 +877,7 @@ void fchat1s(std::string json_str){
                 hh.chathistory.push_back(p.chat);
                 j = {{"1", hh.id1},{"2", hh.id2},{"3", hh.chathistory}};
                 jsonstr = j.dump();
-                reply = (redisReply*)redisCommand(rediss, "SET %s %s", key2, jsonstr.c_str());
+                reply = (redisReply*)redisCommand(rediss, "SET %s %s", key2.c_str(), jsonstr.c_str());
 
                 tt.state = STATE_CFCHAT;
                 tt.did = p.cid;
@@ -868,14 +888,14 @@ void fchat1s(std::string json_str){
                     fa(jsonstr,pp.fd2);
                 else{
                     std::string unid = "un" + p.id;
-                    reply = (redisReply*)redisCommand(rediss, "GET %s ", unid);
+                    reply = (redisReply*)redisCommand(rediss, "GET %s ", unid.c_str());
                     jsonstr = reply->str;
                     j = json::parse(jsonstr);
                     un.un = j["1"].get<std::vector<json>>();
                     un.un.push_back(j1);
                     j = {{"1", un.un}};
                     jsonstr = j.dump();
-                    reply = (redisReply*)redisCommand(rediss, "SET %s %s", unid, jsonstr.c_str());
+                    reply = (redisReply*)redisCommand(rediss, "SET %s %s", unid.c_str(), jsonstr.c_str());
                 }
 
                 freeReplyObject(reply);
@@ -918,7 +938,7 @@ void fadd1s(std::string json_str,int client){
     p.state = j["1"].get<int>();
     p.cid = j["2"].get<std::string>();
     p.id = j["3"].get<std::string>();
-    redisReply* reply = (redisReply*)redisCommand(rediss, "GET %s", p.cid);
+    redisReply* reply = (redisReply*)redisCommand(rediss, "GET %s", p.cid.c_str());
     if(reply == nullptr){
         exit(1);
     }
@@ -937,14 +957,14 @@ void fadd1s(std::string json_str,int client){
             }
         }
     }
-    reply = (redisReply*)redisCommand(rediss, "EXISTS %s", p.id);
+    reply = (redisReply*)redisCommand(rediss, "EXISTS %s", p.id.c_str());
     if(reply == nullptr){
         exit(1);
     }
     else{
         if(reply->type == REDIS_REPLY_INTEGER){
             if(reply->integer == 1){//zai
-                redisReply* reply3 = (redisReply*)redisCommand(rediss, "GET %s ", p.id);
+                redisReply* reply3 = (redisReply*)redisCommand(rediss, "GET %s ", p.id.c_str());
                 jsonstr = reply3->str;
                 j = json::parse(jsonstr);
                 pp.fd2 = j["6"].get<int>();
@@ -963,7 +983,7 @@ void fadd1s(std::string json_str,int client){
                     {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
                 };
                 jsonstr = j.dump();
-                redisReply* reply4 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id, jsonstr.c_str());
+                redisReply* reply4 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id.c_str(), jsonstr.c_str());
                 freeReplyObject(reply3);
                 freeReplyObject(reply4);
 
@@ -976,14 +996,14 @@ void fadd1s(std::string json_str,int client){
                     fa(jsonstr,pp.fd2);
                 else{
                     std::string unid = "un" + p.id;
-                    reply = (redisReply*)redisCommand(rediss, "GET %s ", unid);
+                    reply = (redisReply*)redisCommand(rediss, "GET %s ", unid.c_str());
                     jsonstr = reply->str;
                     j = json::parse(jsonstr);
                     un.un = j["1"].get<std::vector<json>>();
                     un.un.push_back(j1);
                     j = {{"1", un.un}};
                     jsonstr = j.dump();
-                    reply = (redisReply*)redisCommand(rediss, "SET %s %s", unid, jsonstr.c_str());
+                    reply = (redisReply*)redisCommand(rediss, "SET %s %s", unid.c_str(), jsonstr.c_str());
                 }
 
                 t.state = STATE_YES;
@@ -1013,7 +1033,7 @@ void fdel1s(std::string json_str,int client){
     p.state = j["1"].get<int>();
     p.cid = j["2"].get<std::string>();
     p.id = j["3"].get<std::string>();
-    redisReply* reply = (redisReply*)redisCommand(rediss, "GET %s", p.cid);
+    redisReply* reply = (redisReply*)redisCommand(rediss, "GET %s", p.cid.c_str());
     int ii = 0;
     jsonstr = reply->str;
     j = json::parse(jsonstr);
@@ -1031,7 +1051,7 @@ void fdel1s(std::string json_str,int client){
         return;
     }
 
-    reply = (redisReply*)redisCommand(rediss, "GET %s", p.id);
+    reply = (redisReply*)redisCommand(rediss, "GET %s", p.id.c_str());
     jsonstr = reply->str;
     j = json::parse(jsonstr);
     pp.fd2 = j["6"].get<int>();
@@ -1056,7 +1076,7 @@ void fdel1s(std::string json_str,int client){
         {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
     };
     jsonstr = j.dump();
-    redisReply* reply4 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id, jsonstr.c_str());
+    redisReply* reply4 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id.c_str(), jsonstr.c_str());
 
     t.state = STATE_YES;
     j = {{"1", t.state}};
@@ -1065,22 +1085,22 @@ void fdel1s(std::string json_str,int client){
 
     key1 = p.cid + p.id;
     key2 = p.id + p.cid;
-    reply = (redisReply*)redisCommand(rediss, "EXISTS %s", key1);
+    reply = (redisReply*)redisCommand(rediss, "EXISTS %s", key1.c_str());
     if(reply == nullptr){
         exit(1);
     }
     else{
         if(reply->type == REDIS_REPLY_INTEGER){
             if(reply->integer == 1){//zai
-                reply = (redisReply*)redisCommand(rediss, "DEL %s", key1);
+                reply = (redisReply*)redisCommand(rediss, "DEL %s", key1.c_str());
             }
             else{
-                reply = (redisReply*)redisCommand(rediss, "DEL %s", key2);
+                reply = (redisReply*)redisCommand(rediss, "DEL %s", key2.c_str());
             }
         }
     }
 
-    reply = (redisReply*)redisCommand(rediss, "GET %s", p.cid);
+    reply = (redisReply*)redisCommand(rediss, "GET %s", p.cid.c_str());
     jsonstr = reply->str;
     j = json::parse(jsonstr);
     pp.fd2 = j["6"].get<int>();
@@ -1105,7 +1125,7 @@ void fdel1s(std::string json_str,int client){
         {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
     };
     jsonstr = j.dump();
-    reply4 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id, jsonstr.c_str());
+    reply4 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id.c_str(), jsonstr.c_str());
     freeReplyObject(reply4);
     
     freeReplyObject(reply);
@@ -1121,7 +1141,7 @@ void fblock1s(std::string json_str,int client){
     p.state = j["1"].get<int>();
     p.cid = j["2"].get<std::string>();
     p.id = j["3"].get<std::string>();
-    redisReply* reply = (redisReply*)redisCommand(rediss, "GET %s", p.cid);
+    redisReply* reply = (redisReply*)redisCommand(rediss, "GET %s", p.cid.c_str());
     int ii = 0;
     jsonstr = reply->str;
     j = json::parse(jsonstr);
@@ -1166,7 +1186,7 @@ void fblock1s(std::string json_str,int client){
                 {"7", pp1.ustate},{"8", pp1.friendid},{"9", pp1.co_state},{"10", pp1.groups},{"11", pp1.applications}
             };
             jsonstr = j.dump();
-            redisReply* reply4 = (redisReply*)redisCommand(rediss, "SET %s %s", pp1.id, jsonstr.c_str());
+            redisReply* reply4 = (redisReply*)redisCommand(rediss, "SET %s %s", pp1.id.c_str(), jsonstr.c_str());
             freeReplyObject(reply4);
 
             t.state = STATE_YES;
@@ -1188,7 +1208,7 @@ void fsearch1s(std::string json_str,int client){
     p.state = j["1"].get<int>();
     p.cid = j["2"].get<std::string>();
     p.id = j["3"].get<std::string>();
-    redisReply* reply = (redisReply*)redisCommand(rediss, "GET %s", p.cid);
+    redisReply* reply = (redisReply*)redisCommand(rediss, "GET %s", p.cid.c_str());
     int ii = 0;
     jsonstr = reply->str;
     j = json::parse(jsonstr);
@@ -1212,7 +1232,7 @@ void fsearch1s(std::string json_str,int client){
         p1.state = STATE_YES;
         int pos = std::distance(pp1.friendid.begin(),it);
         p1.co_state = pp1.co_state[pos] ;
-        reply = (redisReply*)redisCommand(rediss, "GET %s", p.id);
+        reply = (redisReply*)redisCommand(rediss, "GET %s", p.id.c_str());
         jsonstr = reply->str;
         j = json::parse(jsonstr);
         pp.ustate = j["7"].get<int>();
@@ -1234,7 +1254,7 @@ void funblock1s(std::string json_str,int client){
     j = json::parse(json_str);
     p.state = j["1"].get<int>();
     p.cid = j["2"].get<std::string>();
-    redisReply* reply = (redisReply*)redisCommand(rediss, "GET %s", p.cid);
+    redisReply* reply = (redisReply*)redisCommand(rediss, "GET %s", p.cid.c_str());
     jsonstr = reply->str;
     j = json::parse(jsonstr);
     pp.friendid = j["8"].get<std::vector<std::string>>();
@@ -1262,7 +1282,7 @@ void fapplication1s(std::string json_str,int client){
     j = json::parse(json_str);
     p.state = j["1"].get<int>();
     p.cid = j["2"].get<std::string>();
-    redisReply* reply = (redisReply*)redisCommand(rediss, "GET %s", p.cid);
+    redisReply* reply = (redisReply*)redisCommand(rediss, "GET %s", p.cid.c_str());
     jsonstr = reply->str;
     j = json::parse(jsonstr);
     pp.applications = j["11"].get<std::vector<std::string>>();
@@ -1286,7 +1306,7 @@ void funblock3s(std::string json_str){
     p.cid = j["2"].get<std::string>();
     p.id = j["3"].get<std::vector<std::string>>();
 
-    redisReply* reply = (redisReply*)redisCommand(rediss, "GET %s", p.cid);
+    redisReply* reply = (redisReply*)redisCommand(rediss, "GET %s", p.cid.c_str());
     jsonstr = reply->str;
     j = json::parse(jsonstr);
     pp.id = j["1"].get<std::string>();
@@ -1310,7 +1330,7 @@ void funblock3s(std::string json_str){
         {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
     };
     jsonstr = j.dump();
-    reply2 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id, jsonstr.c_str());
+    reply2 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id.c_str(), jsonstr.c_str());
     
     freeReplyObject(reply1);
     freeReplyObject(reply2);
@@ -1331,7 +1351,7 @@ void fapplication3s(std::string json_str){
     p.cid = j["2"].get<std::string>();
     p.id = j["3"].get<std::vector<std::string>>();
 
-    redisReply* reply = (redisReply*)redisCommand(rediss, "GET %s", p.cid);
+    redisReply* reply = (redisReply*)redisCommand(rediss, "GET %s", p.cid.c_str());
     jsonstr = reply->str;
     j = json::parse(jsonstr);
     pp.id = j["1"].get<std::string>();
@@ -1356,10 +1376,10 @@ void fapplication3s(std::string json_str){
         {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
     };
     jsonstr = j.dump();
-    reply2 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id, jsonstr.c_str());
+    reply2 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id.c_str(), jsonstr.c_str());
     
     for(const auto& tid : p.id){
-        reply1 = (redisReply*)redisCommand(rediss, "GET %s ", tid);
+        reply1 = (redisReply*)redisCommand(rediss, "GET %s ", tid.c_str());
         jsonstr = reply1->str;
         j = json::parse(jsonstr);
         pp.id = j["1"].get<std::string>();
@@ -1379,13 +1399,13 @@ void fapplication3s(std::string json_str){
             {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
         };
         jsonstr = j.dump();
-        reply2 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id, jsonstr.c_str());
+        reply2 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id.c_str(), jsonstr.c_str());
         key1 = p.cid + tid;
         hh.id1 = p.cid;
         hh.id2 = tid;
         j = {{"1", hh.id1},{"2", hh.id2},{"3", hh.chathistory}};
         jsonstr = j.dump();
-        reply2 = (redisReply*)redisCommand(rediss, "SET %s %s", key1, jsonstr.c_str());
+        reply2 = (redisReply*)redisCommand(rediss, "SET %s %s", key1.c_str(), jsonstr.c_str());
     }
     freeReplyObject(reply1);
     freeReplyObject(reply2);
@@ -1409,7 +1429,7 @@ void gchat1s(std::string json_str){
     std::string ghid;
     ghid = p.gid + 'g';
     
-    redisReply* reply = (redisReply*)redisCommand(rediss, "GET %s ", ghid);
+    redisReply* reply = (redisReply*)redisCommand(rediss, "GET %s ", ghid.c_str());
     jsonstr = reply->str;
     j = json::parse(jsonstr);
     gh.gid = j["1"].get<std::string>();
@@ -1417,16 +1437,16 @@ void gchat1s(std::string json_str){
     gh.chatghistory.push_back(p.gchat);
     j = {{"1", gh.gid},{"2", gh.chatghistory}};
     jsonstr = j.dump();
-    reply = (redisReply*)redisCommand(rediss, "SET %s %s", ghid, jsonstr.c_str());
+    reply = (redisReply*)redisCommand(rediss, "SET %s %s", ghid.c_str(), jsonstr.c_str());
     
-    reply = (redisReply*)redisCommand(rediss, "GET %s ", p.gid);
+    reply = (redisReply*)redisCommand(rediss, "GET %s ", p.gid.c_str());
     jsonstr = reply->str;
     j = json::parse(jsonstr);
     gg.g_leader = j["2"].get<std::string>();
     gg.member = j["4"].get<std::vector<std::string>>();
 
     if(gg.g_leader != p.cid){
-        reply = (redisReply*)redisCommand(rediss, "GET %s ", gg.g_leader);
+        reply = (redisReply*)redisCommand(rediss, "GET %s ", gg.g_leader.c_str());
         jsonstr = reply->str;
         j = json::parse(jsonstr);
         int client1 = j["6"].get<int>();
@@ -1441,21 +1461,21 @@ void gchat1s(std::string json_str){
             fa(jsonstr,client1);
         else{
             std::string unid = "un" + gg.g_leader;
-            reply = (redisReply*)redisCommand(rediss, "GET %s ", unid);
+            reply = (redisReply*)redisCommand(rediss, "GET %s ", unid.c_str());
             jsonstr = reply->str;
             j = json::parse(jsonstr);
             un.un = j["1"].get<std::vector<json>>();
             un.un.push_back(j1);
             j = {{"1", un.un}};
             jsonstr = j.dump();
-            reply = (redisReply*)redisCommand(rediss, "SET %s %s", unid, jsonstr.c_str());
+            reply = (redisReply*)redisCommand(rediss, "SET %s %s", unid.c_str(), jsonstr.c_str());
         }
     }
 
     for(const auto& tid : gg.member){
         if(p.cid == tid)
             continue;
-        reply = (redisReply*)redisCommand(rediss, "GET %s ", tid);
+        reply = (redisReply*)redisCommand(rediss, "GET %s ", tid.c_str());
         jsonstr = reply->str;
         j = json::parse(jsonstr);
         int client1 = j["6"].get<int>();
@@ -1470,14 +1490,14 @@ void gchat1s(std::string json_str){
             fa(jsonstr,client1);
         else{
             std::string unid = "un" + tid;
-            reply = (redisReply*)redisCommand(rediss, "GET %s ", unid);
+            reply = (redisReply*)redisCommand(rediss, "GET %s ", unid.c_str());
             jsonstr = reply->str;
             j = json::parse(jsonstr);
             un.un = j["1"].get<std::vector<json>>();
             un.un.push_back(j1);
             j = {{"1", un.un}};
             jsonstr = j.dump();
-            reply = (redisReply*)redisCommand(rediss, "SET %s %s", unid, jsonstr.c_str());
+            reply = (redisReply*)redisCommand(rediss, "SET %s %s", unid.c_str(), jsonstr.c_str());
         }
     }
     freeReplyObject(reply);
@@ -1523,7 +1543,7 @@ void gcreation1s(std::string json_str,int client){
     p.state = j["1"].get<int>();
     p.cid = j["2"].get<std::string>();
     p.gid = j["3"].get<std::string>();
-    redisReply* reply = (redisReply*)redisCommand(rediss, "EXISTS %s", p.gid);
+    redisReply* reply = (redisReply*)redisCommand(rediss, "EXISTS %s", p.gid.c_str());
     if(reply == nullptr){
         exit(1);
     }
@@ -1536,7 +1556,7 @@ void gcreation1s(std::string json_str,int client){
                 fa(jsonstr,client);
             }
             else{
-                redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", p.cid);
+                redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", p.cid.c_str());
                 jsonstr = reply1->str;
                 j = json::parse(jsonstr);
                 pp.id = j["1"].get<std::string>();
@@ -1555,7 +1575,7 @@ void gcreation1s(std::string json_str,int client){
                     {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
                 };
                 jsonstr = j.dump();
-                redisReply* reply2 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id, jsonstr.c_str());
+                redisReply* reply2 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id.c_str(), jsonstr.c_str());
                 freeReplyObject(reply1);
                 freeReplyObject(reply2);
 
@@ -1563,13 +1583,13 @@ void gcreation1s(std::string json_str,int client){
                 gg.g_leader = p.cid;
                 j = {{"1", gg.gid},{"2", gg.g_leader},{"3", gg.manager},{"4", gg.member},{"5", gg.examine}};
                 jsonstr = j.dump();
-                reply = (redisReply*)redisCommand(rediss, "SET %s %s", gg.gid, jsonstr.c_str());
+                reply = (redisReply*)redisCommand(rediss, "SET %s %s", gg.gid.c_str(), jsonstr.c_str());
 
                 gh.gid = p.gid;
                 std::string ghid = p.gid + 'g';
                 j = {{"1", gh.gid},{"2", gh.chatghistory}};
                 jsonstr = j.dump();
-                reply = (redisReply*)redisCommand(rediss, "SET %s %s", ghid, jsonstr.c_str());
+                reply = (redisReply*)redisCommand(rediss, "SET %s %s", ghid.c_str(), jsonstr.c_str());
 
                 t.state = STATE_YES;
                 j = {{"1", t.state}};
@@ -1592,14 +1612,14 @@ void gdissolution1s(std::string json_str,int client){
     p.state = j["1"].get<int>();
     p.cid = j["2"].get<std::string>();
     p.gid = j["3"].get<std::string>();
-    redisReply* reply = (redisReply*)redisCommand(rediss, "EXISTS %s", p.gid);
+    redisReply* reply = (redisReply*)redisCommand(rediss, "EXISTS %s", p.gid.c_str());
     if(reply == nullptr){
         exit(1);
     }
     else{
         if(reply->type == REDIS_REPLY_INTEGER){
             if(reply->integer == 1){//zai
-                reply = (redisReply*)redisCommand(rediss, "GET %s ", p.gid);
+                reply = (redisReply*)redisCommand(rediss, "GET %s ", p.gid.c_str());
                 jsonstr = reply->str;
                 j = json::parse(jsonstr);
                 gg.g_leader = j["2"].get<std::string>();
@@ -1610,7 +1630,7 @@ void gdissolution1s(std::string json_str,int client){
                     jsonstr = j.dump();
                     fa(jsonstr,client);
 
-                    redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", p.cid);
+                    redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", p.cid.c_str());
                     jsonstr = reply1->str;
                     j = json::parse(jsonstr);
                     pp.id = j["1"].get<std::string>();
@@ -1634,7 +1654,7 @@ void gdissolution1s(std::string json_str,int client){
                     redisReply* reply2 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id, jsonstr.c_str());
 
                     for(const auto& tid : gg.member){
-                        reply1 = (redisReply*)redisCommand(rediss, "GET %s ", tid);
+                        reply1 = (redisReply*)redisCommand(rediss, "GET %s ", tid.c_str());
                         jsonstr = reply1->str;
                         j = json::parse(jsonstr);
                         pp.id = j["1"].get<std::string>();
@@ -1655,11 +1675,11 @@ void gdissolution1s(std::string json_str,int client){
                             {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
                         };
                         jsonstr = j.dump();
-                        reply2 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id, jsonstr.c_str());
+                        reply2 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id.c_str(), jsonstr.c_str());
                     }
                     std::string ghid = p.gid + 'g';
-                    reply = (redisReply*)redisCommand(rediss, "DEL %s ", p.gid);
-                    reply = (redisReply*)redisCommand(rediss, "DEL %s ", ghid);
+                    reply = (redisReply*)redisCommand(rediss, "DEL %s ", p.gid.c_str());
+                    reply = (redisReply*)redisCommand(rediss, "DEL %s ", ghid.c_str());
 
                     freeReplyObject(reply1);
                     freeReplyObject(reply2);
@@ -1696,14 +1716,14 @@ void gapplication1s(std::string json_str,int client){
     p.cid = j["2"].get<std::string>();
     p.gid = j["3"].get<std::string>();
     redisReply* reply1;
-    redisReply* reply = (redisReply*)redisCommand(rediss, "EXISTS %s", p.gid);
+    redisReply* reply = (redisReply*)redisCommand(rediss, "EXISTS %s", p.gid.c_str());
     if(reply == nullptr){
         exit(1);
     }
     else{
         if(reply->type == REDIS_REPLY_INTEGER){
             if(reply->integer == 1){//zai
-                reply = (redisReply*)redisCommand(rediss, "GET %s ", p.gid);
+                reply = (redisReply*)redisCommand(rediss, "GET %s ", p.gid.c_str());
                 jsonstr = reply->str;
                 j = json::parse(jsonstr);
                 gg.member = j["4"].get<std::vector<std::string>>();
@@ -1725,7 +1745,7 @@ void gapplication1s(std::string json_str,int client){
                 gg.manager = j["3"].get<std::vector<std::string>>();
                 gg.gid = j["1"].get<std::string>();
                 gg.g_leader = j["2"].get<std::string>();
-                reply1 = (redisReply*)redisCommand(rediss, "GET %s ", gg.g_leader);
+                reply1 = (redisReply*)redisCommand(rediss, "GET %s ", gg.g_leader.c_str());
                 jsonstr = reply->str;
                 j = json::parse(jsonstr);
                 client1 = j["6"].get<int>();
@@ -1734,7 +1754,7 @@ void gapplication1s(std::string json_str,int client){
                 jsonstr = j.dump();
                 fa(jsonstr,client1);
                 for(const auto& n : gg.manager){
-                    reply1 = (redisReply*)redisCommand(rediss, "GET %s ", n);
+                    reply1 = (redisReply*)redisCommand(rediss, "GET %s ", n.c_str());
                     jsonstr = reply->str;
                     j = json::parse(jsonstr);
                     client1 = j["6"].get<int>();
@@ -1746,7 +1766,7 @@ void gapplication1s(std::string json_str,int client){
                 gg.examine.push_back(p.cid);
                 j = {{"1", gg.gid},{"2", gg.g_leader},{"3", gg.manager},{"4", gg.member},{"5", gg.examine}};
                 jsonstr = j.dump();
-                reply = (redisReply*)redisCommand(rediss, "SET %s %s", gg.gid, jsonstr.c_str());
+                reply = (redisReply*)redisCommand(rediss, "SET %s %s", gg.gid.c_str(), jsonstr.c_str());
 
             }
             else{
@@ -1772,14 +1792,14 @@ void gexit1s(std::string json_str,int client){
     p.state = j["1"].get<int>();
     p.cid = j["2"].get<std::string>();
     p.gid = j["3"].get<std::string>();
-    redisReply* reply = (redisReply*)redisCommand(rediss, "EXISTS %s", p.gid);
+    redisReply* reply = (redisReply*)redisCommand(rediss, "EXISTS %s", p.gid.c_str());
     if(reply == nullptr){
         exit(1);
     }
     else{
         if(reply->type == REDIS_REPLY_INTEGER){
             if(reply->integer == 1){//zai
-                reply = (redisReply*)redisCommand(rediss, "GET %s ", p.gid);
+                reply = (redisReply*)redisCommand(rediss, "GET %s ", p.gid.c_str());
                 jsonstr = reply->str;
                 j = json::parse(jsonstr);
                 gg.g_leader = j["2"].get<std::string>();
@@ -1810,10 +1830,10 @@ void gexit1s(std::string json_str,int client){
                             gg.member.erase(its);
                         j = {{"1", gg.gid},{"2", gg.g_leader},{"3", gg.manager},{"4", gg.member},{"5", gg.examine}};
                         jsonstr = j.dump();
-                        reply = (redisReply*)redisCommand(rediss, "SET %s %s", gg.gid, jsonstr.c_str());
+                        reply = (redisReply*)redisCommand(rediss, "SET %s %s", gg.gid.c_str(), jsonstr.c_str());
                         freeReplyObject(reply);
 
-                        redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", p.cid);
+                        redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", p.cid.c_str());
                         jsonstr = reply1->str;
                         j = json::parse(jsonstr);
                         pp.id = j["1"].get<std::string>();
@@ -1834,7 +1854,7 @@ void gexit1s(std::string json_str,int client){
                             {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
                         };
                         jsonstr = j.dump();
-                        redisReply* reply2 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id, jsonstr.c_str());
+                        redisReply* reply2 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id.c_str(), jsonstr.c_str());
                         freeReplyObject(reply1);
                         freeReplyObject(reply2);
 
@@ -1852,10 +1872,10 @@ void gexit1s(std::string json_str,int client){
                             gg.member.erase(its);
                         j = {{"1", gg.gid},{"2", gg.g_leader},{"3", gg.manager},{"4", gg.member},{"5", gg.examine}};
                         jsonstr = j.dump();
-                        reply = (redisReply*)redisCommand(rediss, "SET %s %s", gg.gid, jsonstr.c_str());
+                        reply = (redisReply*)redisCommand(rediss, "SET %s %s", gg.gid.c_str(), jsonstr.c_str());
                         freeReplyObject(reply);
 
-                        redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", p.cid);
+                        redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", p.cid.c_str());
                         jsonstr = reply1->str;
                         j = json::parse(jsonstr);
                         pp.id = j["1"].get<std::string>();
@@ -1876,7 +1896,7 @@ void gexit1s(std::string json_str,int client){
                             {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
                         };
                         jsonstr = j.dump();
-                        redisReply* reply2 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id, jsonstr.c_str());
+                        redisReply* reply2 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id.c_str(), jsonstr.c_str());
                         freeReplyObject(reply1);
                         freeReplyObject(reply2);
 
@@ -1911,14 +1931,14 @@ void addmanager1s(std::string json_str,int client){
     p.cid = j["2"].get<std::string>();
     p.gid = j["3"].get<std::string>();
     p.id = j["4"].get<std::string>();
-    redisReply* reply = (redisReply*)redisCommand(rediss, "EXISTS %s", p.gid);
+    redisReply* reply = (redisReply*)redisCommand(rediss, "EXISTS %s", p.gid.c_str());
     if(reply == nullptr){
         exit(1);
     }
     else{
         if(reply->type == REDIS_REPLY_INTEGER){
             if(reply->integer == 1){//zai
-                reply = (redisReply*)redisCommand(rediss, "GET %s ", p.gid);
+                reply = (redisReply*)redisCommand(rediss, "GET %s ", p.gid.c_str());
                 jsonstr = reply->str;
                 j = json::parse(jsonstr);
                 gg.g_leader = j["2"].get<std::string>();
@@ -1953,7 +1973,7 @@ void addmanager1s(std::string json_str,int client){
                         gg.manager.push_back(p.id);
                         j = {{"1", gg.gid},{"2", gg.g_leader},{"3", gg.manager},{"4", gg.member},{"5", gg.examine}};
                         jsonstr = j.dump();
-                        reply = (redisReply*)redisCommand(rediss, "SET %s %s", gg.gid, jsonstr.c_str());
+                        reply = (redisReply*)redisCommand(rediss, "SET %s %s", gg.gid.c_str(), jsonstr.c_str());
                         freeReplyObject(reply);
                         return;
                     }
@@ -1986,14 +2006,14 @@ void delmanager1s(std::string json_str,int client){
     p.cid = j["2"].get<std::string>();
     p.gid = j["3"].get<std::string>();
     p.id = j["4"].get<std::string>();
-    redisReply* reply = (redisReply*)redisCommand(rediss, "EXISTS %s", p.gid);
+    redisReply* reply = (redisReply*)redisCommand(rediss, "EXISTS %s", p.gid.c_str());
     if(reply == nullptr){
         exit(1);
     }
     else{
         if(reply->type == REDIS_REPLY_INTEGER){
             if(reply->integer == 1){//zai
-                reply = (redisReply*)redisCommand(rediss, "GET %s ", p.gid);
+                reply = (redisReply*)redisCommand(rediss, "GET %s ", p.gid.c_str());
                 jsonstr = reply->str;
                 j = json::parse(jsonstr);
                 gg.g_leader = j["2"].get<std::string>();
@@ -2020,7 +2040,7 @@ void delmanager1s(std::string json_str,int client){
                             gg.manager.erase(its);
                         j = {{"1", gg.gid},{"2", gg.g_leader},{"3", gg.manager},{"4", gg.member},{"5", gg.examine}};
                         jsonstr = j.dump();
-                        reply = (redisReply*)redisCommand(rediss, "SET %s %s", gg.gid, jsonstr.c_str());
+                        reply = (redisReply*)redisCommand(rediss, "SET %s %s", gg.gid.c_str(), jsonstr.c_str());
                         freeReplyObject(reply);
                         return;
                     }
@@ -2054,13 +2074,13 @@ void examine1s(std::string json_str,int client){
     j = json::parse(json_str);
     p.state = j["1"].get<int>();
     p.cid = j["2"].get<std::string>();
-    redisReply* reply = (redisReply*)redisCommand(rediss, "GET %s ", p.cid);
+    redisReply* reply = (redisReply*)redisCommand(rediss, "GET %s ", p.cid.c_str());
     jsonstr = reply->str;
     j = json::parse(jsonstr);
     pp.groups = j["10"].get<std::vector<std::string>>();
     for(const auto& m : pp.groups){
         n = 0;
-        redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", m);
+        redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", m.c_str());
         p2.gid = m;
         jsonstr2 = reply1->str;
         j = json::parse(jsonstr2);
@@ -2109,7 +2129,7 @@ void examine3s(std::string json_str){
     redisReply* reply2;
     redisReply* reply3;
     for(const auto& n : p1){
-        reply = (redisReply*)redisCommand(rediss, "GET %s ", n.gid);
+        reply = (redisReply*)redisCommand(rediss, "GET %s ", n.gid.c_str());
         jsonstr = reply->str;
         j = json::parse(jsonstr);
         gg.member = j["4"].get<std::vector<std::string>>();
@@ -2123,7 +2143,7 @@ void examine3s(std::string json_str){
             auto its = std::find(gg.examine.begin(),gg.examine.end(),nn);
             if(its != gg.examine.end())
                 gg.examine.erase(its);
-            reply1 = (redisReply*)redisCommand(rediss, "GET %s ", nn);
+            reply1 = (redisReply*)redisCommand(rediss, "GET %s ", nn.c_str());
             jsonstr = reply1->str;
             j = json::parse(jsonstr);
             pp.id = j["1"].get<std::string>();
@@ -2142,12 +2162,12 @@ void examine3s(std::string json_str){
                 {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
             };
             jsonstr = j.dump();
-            reply3 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id, jsonstr.c_str());
+            reply3 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id.c_str(), jsonstr.c_str());
         }
         
         j = {{"1", gg.gid},{"2", gg.g_leader},{"3", gg.manager},{"4", gg.member},{"5", gg.examine}};
         jsonstr = j.dump();
-        reply2 = (redisReply*)redisCommand(rediss, "SET %s %s", gg.gid, jsonstr.c_str());
+        reply2 = (redisReply*)redisCommand(rediss, "SET %s %s", gg.gid.c_str(), jsonstr.c_str());
     }
     freeReplyObject(reply);
     freeReplyObject(reply1);
@@ -2167,14 +2187,14 @@ void delmember1s(std::string json_str,int client){
     p.cid = j["2"].get<std::string>();
     p.gid = j["3"].get<std::string>();
     p.id = j["4"].get<std::string>();
-    redisReply* reply = (redisReply*)redisCommand(rediss, "EXISTS %s", p.gid);
+    redisReply* reply = (redisReply*)redisCommand(rediss, "EXISTS %s", p.gid.c_str());
     if(reply == nullptr){
         exit(1);
     }
     else{
         if(reply->type == REDIS_REPLY_INTEGER){
             if(reply->integer == 1){//zai
-                reply = (redisReply*)redisCommand(rediss, "GET %s ", p.gid);
+                reply = (redisReply*)redisCommand(rediss, "GET %s ", p.gid.c_str());
                 jsonstr = reply->str;
                 j = json::parse(jsonstr);
                 int m = 0,n = 0,x = 0,y = 0;
@@ -2214,10 +2234,10 @@ void delmember1s(std::string json_str,int client){
                         gg.member.erase(its);
                     j = {{"1", gg.gid},{"2", gg.g_leader},{"3", gg.manager},{"4", gg.member},{"5", gg.examine}};
                     jsonstr = j.dump();
-                    reply = (redisReply*)redisCommand(rediss, "SET %s %s", gg.gid, jsonstr.c_str());
+                    reply = (redisReply*)redisCommand(rediss, "SET %s %s", gg.gid.c_str(), jsonstr.c_str());
                     freeReplyObject(reply);
 
-                    redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", p.id);
+                    redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", p.id.c_str());
                     jsonstr = reply1->str;
                     j = json::parse(jsonstr);
                     pp.id = j["1"].get<std::string>();
@@ -2238,7 +2258,7 @@ void delmember1s(std::string json_str,int client){
                         {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
                     };
                     jsonstr = j.dump();
-                    redisReply* reply2 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id, jsonstr.c_str());
+                    redisReply* reply2 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id.c_str(), jsonstr.c_str());
                     freeReplyObject(reply1);
                     freeReplyObject(reply2);
 
@@ -2254,10 +2274,10 @@ void delmember1s(std::string json_str,int client){
                         gg.member.erase(its1);
                     j = {{"1", gg.gid},{"2", gg.g_leader},{"3", gg.manager},{"4", gg.member},{"5", gg.examine}};
                     jsonstr = j.dump();
-                    reply = (redisReply*)redisCommand(rediss, "SET %s %s", gg.gid, jsonstr.c_str());
+                    reply = (redisReply*)redisCommand(rediss, "SET %s %s", gg.gid.c_str(), jsonstr.c_str());
                     freeReplyObject(reply);
 
-                    redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", p.id);
+                    redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", p.id.c_str());
                     jsonstr = reply1->str;
                     j = json::parse(jsonstr);
                     pp.id = j["1"].get<std::string>();
@@ -2278,7 +2298,7 @@ void delmember1s(std::string json_str,int client){
                         {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
                     };
                     jsonstr = j.dump();
-                    redisReply* reply2 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id, jsonstr.c_str());
+                    redisReply* reply2 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id.c_str(), jsonstr.c_str());
                     freeReplyObject(reply1);
                     freeReplyObject(reply2);
 
