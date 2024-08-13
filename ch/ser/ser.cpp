@@ -1,5 +1,19 @@
 #include "ser.hpp"
 
+void th1(int fd){
+    char buffer[BUFFER_SIZE];
+    std::string json_str;
+    ssize_t bytes_read;
+    std::cout <<'\n' <<"线程" <<std::endl;
+    while(1){
+        bytes_read = recv(fd,buffer,sizeof(buffer),0);
+        if(bytes_read <= 0)
+            break;
+        json_str += std::string(buffer,bytes_read);
+    }
+    run(json_str,fd);
+}
+
 void run(std::string json_str,int client){
     //char a = json_str[json_str.find(':')+1];
     //char b = json_str[json_str.find(':')+2];
@@ -15,80 +29,43 @@ void run(std::string json_str,int client){
     std::cout << "具体操作:" << state << std::endl;
     switch (state)
     {
-    case STATE_TOOCLIENT1: tooclient1s(json_str,client);
-        break;
-    case STATE_FHISTORY1: fhistory1s(json_str,client);
-        break;
-    case STATE_GHISTORY1: ghistory1s(json_str,client);
-        break;
-    case STATE_REGISTER1: pregister1s(json_str,client);
-        break;
-    case STATE_REGISTER2: pregister2s(json_str,client);
-        break;
-    case STATE_LOG_ON: logons(json_str,client);
-        break;
-    case STATE_FORGET1: forget1s(json_str,client);
-        break;
-    case STATE_FORGET2: forget2s(json_str);
-        break;
-    case STATE_LOG_OFF: logoffs(json_str,client);
-        break;
-    case STATE_FLIST1: flist1s(json_str,client);
-        break;
-    case STATE_GLIST1: glist1s(json_str,client);
-        break;
-    case STATE_FCHAT1: fchat1s(json_str);
-        break;
-    case STATE_FSENDFILE1: fsendfile1s(json_str);
-        break;
-    case STATE_FFILEHISTORY1: ffilehistory1s(json_str);
-        break;
-    case STATE_FADD1: fadd1s(json_str,client);
-        break;
-    case STATE_FDEL1: fdel1s(json_str,client);
-        break;
-    case STATE_FBLOCK1: fblock1s(json_str,client);
-        break;
-    case STATE_FUNBLOCK1: funblock1s(json_str,client);
-        break;
-    case STATE_FUNBLOCK3: funblock3s(json_str);
-        break;
-    case STATE_FSEARCH1: fsearch1s(json_str,client);
-        break;
-    case STATE_FAPPLICATION1: fapplication1s(json_str,client);
-        break;
-    case STATE_FAPPLICATION3: fapplication3s(json_str);
-        break;
-    case STATE_GCHAT1: gchat1s(json_str);
-        break;
-    case STATE_GSENDFILE1: gsendfile1s(json_str);
-        break;
-    case STATE_GFILEHISTORY1: gfilehistory1s(json_str);
-        break;
-    case STATE_GCREATION1: gcreation1s(json_str,client);
-        break;
-    case STATE_GDISSOLUTION1: gdissolution1s(json_str,client);
-        break;
-    case STATE_GAPPLICATION1: gapplication1s(json_str,client);
-        break;
-    case STATE_GEXIT1: gexit1s(json_str,client);
-        break;
-    case STATE_ADDMANAGER1: addmanager1s(json_str,client);
-        break;
-    case STATE_DELMANAGER1: delmanager1s(json_str,client);
-        break;
-    case STATE_EXAMINE1: examine1s(json_str,client);
-        break;
-    case STATE_EXAMINE3: examine3s(json_str);
-        break;
-    case STATE_DELMEMBER1: delmember1s(json_str,client);
-        break;
-    case STATE_EXIT1: exit1s(json_str,client);
-        break;
-    case STATE_EXIT2: exit2s(json_str,client);
-        break;
-    default:
-        break;
+    case STATE_TOOCLIENT1: tooclient1s(json_str,client);break;
+    case STATE_FHISTORY1: fhistory1s(json_str,client);break;
+    case STATE_GHISTORY1: ghistory1s(json_str,client);break;
+    case STATE_REGISTER1: pregister1s(json_str,client);break;
+    case STATE_REGISTER2: pregister2s(json_str,client);break;
+    case STATE_LOG_ON: logons(json_str,client);break;
+    case STATE_FORGET1: forget1s(json_str,client);break;
+    case STATE_FORGET2: forget2s(json_str);break;
+    case STATE_LOG_OFF: logoffs(json_str,client);break;
+    case STATE_FLIST1: flist1s(json_str,client);break;
+    case STATE_GLIST1: glist1s(json_str,client);break;
+    case STATE_FCHAT1: fchat1s(json_str);break;
+    case STATE_FSENDFILE1: fsendfile1s(json_str);break;
+    case STATE_FFILEHISTORY1: ffilehistory1s(json_str);break;
+    case STATE_FADD1: fadd1s(json_str,client);break;
+    case STATE_FDEL1: fdel1s(json_str,client);break;
+    case STATE_FBLOCK1: fblock1s(json_str,client);break;
+    case STATE_FUNBLOCK1: funblock1s(json_str,client);break;
+    case STATE_FUNBLOCK3: funblock3s(json_str);break;
+    case STATE_FSEARCH1: fsearch1s(json_str,client);break;
+    case STATE_FAPPLICATION1: fapplication1s(json_str,client);break;
+    case STATE_FAPPLICATION3: fapplication3s(json_str);break;
+    case STATE_GCHAT1: gchat1s(json_str);break;
+    case STATE_GSENDFILE1: gsendfile1s(json_str);break;
+    case STATE_GFILEHISTORY1: gfilehistory1s(json_str);break;
+    case STATE_GCREATION1: gcreation1s(json_str,client);break;
+    case STATE_GDISSOLUTION1: gdissolution1s(json_str,client);break;
+    case STATE_GAPPLICATION1: gapplication1s(json_str,client);break;
+    case STATE_GEXIT1: gexit1s(json_str,client);break;
+    case STATE_ADDMANAGER1: addmanager1s(json_str,client);break;
+    case STATE_DELMANAGER1: delmanager1s(json_str,client);break;
+    case STATE_EXAMINE1: examine1s(json_str,client);break;
+    case STATE_EXAMINE3: examine3s(json_str);break;
+    case STATE_DELMEMBER1: delmember1s(json_str,client);break;
+    case STATE_EXIT1: exit1s(json_str,client);break;
+    case STATE_EXIT2: exit2s(json_str,client);break;
+    default:break;
     }
     if(state == STATE_EXIT1||state == STATE_EXIT2)
         return;
@@ -163,6 +140,7 @@ void tooclient1s(std::string json_str,int client){
                     un.un = j["1"].get<std::vector<json>>();
                     for(const auto& u : un.un){
                         jsonstr = u.dump();
+                        usleep(50000);
                         fa(jsonstr,pp.fd2);
                     }
                     un.un.clear();
@@ -360,6 +338,7 @@ void pregister2s(std::string json_str,int client){
     pp.problem = p.problem;
     pp.awswer = p.awswer;
     pp.fd1 = client;
+    pp.ustate = STATE_ON;
     j = {{"1", pp.id},{"2", pp.password},{"3", pp.problem},{"4", pp.awswer},{"5", pp.fd1},{"6", pp.fd2},
         {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
     };
@@ -408,6 +387,28 @@ void logons(std::string json_str,int client){
                     return;
                 }
                 if(pp.password == p.password){
+
+                    reply1 = (redisReply*)redisCommand(rediss, "GET %s ", p.cid.c_str());
+                    jsonstr = reply1->str;
+                    j = json::parse(jsonstr);
+                    pp.id = j["1"].get<std::string>();
+                    pp.password = j["2"].get<std::string>();
+                    pp.problem = j["3"].get<std::string>();
+                    pp.awswer = j["4"].get<std::string>(); 
+                    pp.fd1 = j["5"].get<int>();
+                    pp.fd2 = j["6"].get<int>();
+                    pp.ustate = STATE_ON;
+                    pp.friendid = j["8"].get<std::vector<std::string>>();
+                    pp.co_state = j["9"].get<std::vector<int>>();
+                    pp.groups = j["10"].get<std::vector<std::string>>();
+                    pp.applications = j["11"].get<std::vector<std::string>>();
+                    j = {{"1", pp.id},{"2", pp.password},{"3", pp.problem},{"4", pp.awswer},{"5", pp.fd1},{"6", pp.fd2},
+                        {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
+                    };
+                    jsonstr = j.dump();
+                    redisReply* reply2 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id.c_str(), jsonstr.c_str());
+                    freeReplyObject(reply2);
+
                     t.state = STATE_YES;
                     j = {{"1", t.state}};
                     jsonstr = j.dump();
@@ -541,7 +542,7 @@ void forget2s(std::string json_str){
     pp.awswer = j["4"].get<std::string>(); 
     pp.fd1 = j["5"].get<int>();
     pp.fd2 = j["6"].get<int>();
-    pp.ustate = j["7"].get<int>();
+    pp.ustate = STATE_ON;
     pp.friendid = j["8"].get<std::vector<std::string>>();
     pp.co_state = j["9"].get<std::vector<int>>();
     pp.groups = j["10"].get<std::vector<std::string>>();
@@ -1392,8 +1393,7 @@ void fapplication3s(std::string json_str){
         pp.friendid.push_back(tid);
         pp.co_state.push_back(STATE_UNBLOCK);
         auto it = std::find(pp.applications.begin(),pp.applications.end(),tid);
-        if(it != pp.applications.end())
-            pp.applications.erase(it);
+        pp.applications.erase(it);
     }
     j = {{"1", pp.id},{"2", pp.password},{"3", pp.problem},{"4", pp.awswer},{"5", pp.fd1},{"6", pp.fd2},
         {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
@@ -1668,12 +1668,13 @@ void gdissolution1s(std::string json_str,int client){
                     pp.groups = j["10"].get<std::vector<std::string>>();
                     pp.applications = j["11"].get<std::vector<std::string>>();
                     auto it = std::find(pp.groups.begin(),pp.groups.end(),p.gid);
-                        pp.groups.erase(it);
+                    pp.groups.erase(it);
+                    std::cout <<p.cid<<p.gid<<pp.groups[0]<<std::endl;
                     j = {{"1", pp.id},{"2", pp.password},{"3", pp.problem},{"4", pp.awswer},{"5", pp.fd1},{"6", pp.fd2},
                         {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
                     };
                     jsonstr = j.dump();
-                    redisReply* reply2 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id, jsonstr.c_str());
+                    redisReply* reply2 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id.c_str(), jsonstr.c_str());
 
                     for(const auto& tid : gg.member){
                         reply1 = (redisReply*)redisCommand(rediss, "GET %s ", tid.c_str());
@@ -1691,7 +1692,7 @@ void gdissolution1s(std::string json_str,int client){
                         pp.groups = j["10"].get<std::vector<std::string>>();
                         pp.applications = j["11"].get<std::vector<std::string>>();
                         auto it = std::find(pp.groups.begin(),pp.groups.end(),p.gid);
-                            pp.groups.erase(it);
+                        pp.groups.erase(it);
                         j = {{"1", pp.id},{"2", pp.password},{"3", pp.problem},{"4", pp.awswer},{"5", pp.fd1},{"6", pp.fd2},
                             {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
                         };
@@ -1726,12 +1727,13 @@ void gdissolution1s(std::string json_str,int client){
 
 void gapplication1s(std::string json_str,int client){
     gapplication1 p;
-    json j;
+    json j,j1;
     std::string jsonstr;
     yesorno t;
     pgroup gg;
     cshou tt;
     int client1;
+    unonline un;
     j = json::parse(json_str);
     p.state = j["1"].get<int>();
     p.cid = j["2"].get<std::string>();
@@ -1748,6 +1750,18 @@ void gapplication1s(std::string json_str,int client){
                 jsonstr = reply->str;
                 j = json::parse(jsonstr);
                 gg.member = j["4"].get<std::vector<std::string>>();
+                gg.examine = j["5"].get<std::vector<std::string>>();
+                gg.manager = j["3"].get<std::vector<std::string>>();
+                gg.gid = j["1"].get<std::string>();
+                gg.g_leader = j["2"].get<std::string>();
+                if(gg.g_leader == p.cid){
+                    t.state = STATE_HAVEDONE;
+                    j = {{"1", t.state}};
+                    jsonstr = j.dump();
+                    fa(jsonstr,client);
+                    freeReplyObject(reply);
+                    return;
+                }
                 for(const auto& tid : gg.member){
                     if(tid == p.cid){
                         t.state = STATE_HAVEDONE;
@@ -1758,32 +1772,70 @@ void gapplication1s(std::string json_str,int client){
                         return;
                     }
                 }
+                for(const auto& tid : gg.examine){
+                    if(tid == p.cid){
+                        t.state = STATE_HAVEADD;
+                        j = {{"1", t.state}};
+                        jsonstr = j.dump();
+                        fa(jsonstr,client);
+                        freeReplyObject(reply);
+                        return;
+                    }
+                }
+
                 t.state = STATE_YES;
                 j = {{"1", t.state}};
                 jsonstr = j.dump();
                 fa(jsonstr,client);
-                gg.examine = j["5"].get<std::vector<std::string>>();
-                gg.manager = j["3"].get<std::vector<std::string>>();
-                gg.gid = j["1"].get<std::string>();
-                gg.g_leader = j["2"].get<std::string>();
+
                 reply1 = (redisReply*)redisCommand(rediss, "GET %s ", gg.g_leader.c_str());
-                jsonstr = reply->str;
+                jsonstr = reply1->str;
                 j = json::parse(jsonstr);
                 client1 = j["6"].get<int>();
+                int ustate = j["7"].get<int>();
                 tt.state = STATE_CGAPPLICATION;
-                j = {{"1", tt.state},{"2", p.cid},{"3", p.gid}};
-                jsonstr = j.dump();
-                fa(jsonstr,client1);
-                for(const auto& n : gg.manager){
-                    reply1 = (redisReply*)redisCommand(rediss, "GET %s ", n.c_str());
+                j1 = {{"1", tt.state},{"2", p.cid},{"3", p.gid}};
+                jsonstr = j1.dump();
+
+                if(ustate == STATE_ON)
+                    fa(jsonstr,client1);
+                else{
+                    std::string unid = "un" + gg.g_leader;
+                    reply = (redisReply*)redisCommand(rediss, "GET %s ", unid.c_str());
                     jsonstr = reply->str;
                     j = json::parse(jsonstr);
-                    client1 = j["6"].get<int>();
-                    tt.state = STATE_CGAPPLICATION;
-                    j = {{"1", tt.state},{"2", p.cid},{"3", p.gid}};
+                    un.un = j["1"].get<std::vector<json>>();
+                    un.un.push_back(j1);
+                    j = {{"1", un.un}};
                     jsonstr = j.dump();
-                    fa(jsonstr,client1);
+                    reply = (redisReply*)redisCommand(rediss, "SET %s %s", unid.c_str(), jsonstr.c_str());
                 }
+
+                for(const auto& n : gg.manager){
+                    reply1 = (redisReply*)redisCommand(rediss, "GET %s ", n.c_str());
+                    jsonstr = reply1->str;
+                    j = json::parse(jsonstr);
+                    client1 = j["6"].get<int>();
+                    ustate = j["7"].get<int>();
+                    tt.state = STATE_CGAPPLICATION;
+                    j1 = {{"1", tt.state},{"2", p.cid},{"3", p.gid}};
+                    jsonstr = j1.dump();
+
+                    if(ustate == STATE_ON)
+                        fa(jsonstr,client1);
+                    else{
+                        std::string unid = "un" + n;
+                        reply = (redisReply*)redisCommand(rediss, "GET %s ", unid.c_str());
+                        jsonstr = reply->str;
+                        j = json::parse(jsonstr);
+                        un.un = j["1"].get<std::vector<json>>();
+                        un.un.push_back(j1);
+                        j = {{"1", un.un}};
+                        jsonstr = j.dump();
+                        reply = (redisReply*)redisCommand(rediss, "SET %s %s", unid.c_str(), jsonstr.c_str());
+                    }
+                }
+
                 gg.examine.push_back(p.cid);
                 j = {{"1", gg.gid},{"2", gg.g_leader},{"3", gg.manager},{"4", gg.member},{"5", gg.examine}};
                 jsonstr = j.dump();
@@ -2082,7 +2134,6 @@ void examine1s(std::string json_str,int client){
     json js = json::array();
     std::string jsonstr,jsonstr2;
     pgroup gg;
-    examine2 p2;
     pperson pp;
     std::vector<examine2> p1;
     int n = 0;
@@ -2094,12 +2145,13 @@ void examine1s(std::string json_str,int client){
     j = json::parse(jsonstr);
     pp.groups = j["10"].get<std::vector<std::string>>();
     for(const auto& m : pp.groups){
+        examine2 p2;
         n = 0;
         redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", m.c_str());
         p2.gid = m;
         jsonstr2 = reply1->str;
         j = json::parse(jsonstr2);
-        gg.g_leader = j["1"].get<std::string>();
+        gg.g_leader = j["2"].get<std::string>();
         gg.manager = j["3"].get<std::vector<std::string>>();
         if(gg.g_leader == p.cid)
             n = 1;
@@ -2109,7 +2161,7 @@ void examine1s(std::string json_str,int client){
                 break;
             }
         }
-        if(n == 1){
+        if(n){
             p2.id = j["5"].get<std::vector<std::string>>();
             p1.push_back(p2);
             freeReplyObject(reply1);
@@ -2117,6 +2169,8 @@ void examine1s(std::string json_str,int client){
     }
     for(const auto& s : p1) {
         j = {{"1", s.gid},{"2", s.id}};
+            jsonstr = j.dump();
+            std::cout <<jsonstr<<std::endl;
         js.push_back(j);
     }
     jsonstr = js.dump();
@@ -2335,15 +2389,33 @@ void exit2s(std::string json_str,int client){
     std::string jsonstr;
     exit12 p;
     json j;
-    int client1;
+    pperson pp;
     j = json::parse(json_str);
     p.state = j["1"].get<int>();
     p.myid = j["2"].get<std::string>();
     redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", p.myid.c_str());
     jsonstr = reply1->str;
     j = json::parse(jsonstr);
-    client1 = j["6"].get<int>();
-    if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, client1, 0) < 0)
+    pp.id = j["1"].get<std::string>();
+    pp.password = j["2"].get<std::string>();
+    pp.problem = j["3"].get<std::string>();
+    pp.awswer = j["4"].get<std::string>(); 
+    pp.fd1 = j["5"].get<int>();
+    pp.fd2 = j["6"].get<int>();
+    pp.ustate = STATE_OUT;
+    pp.friendid = j["8"].get<std::vector<std::string>>();
+    pp.co_state = j["9"].get<std::vector<int>>();
+    pp.groups = j["10"].get<std::vector<std::string>>();
+    pp.applications = j["11"].get<std::vector<std::string>>();
+    j = {{"1", pp.id},{"2", pp.password},{"3", pp.problem},{"4", pp.awswer},{"5", pp.fd1},{"6", pp.fd2},
+        {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
+    };
+    jsonstr = j.dump();
+    redisReply* reply2 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id.c_str(), jsonstr.c_str());
+    freeReplyObject(reply2);
+    freeReplyObject(reply1);
+
+    if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, pp.fd2, 0) < 0)
     {
         perror("epoll_ctl");
         exit(EXIT_FAILURE);

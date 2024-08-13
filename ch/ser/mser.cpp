@@ -1,5 +1,6 @@
 #include "ser.hpp"
 #include "ser.cpp"
+
 /*
 void th(){
     struct epoll_event events;
@@ -18,23 +19,9 @@ void th(){
     run(json_str,events.data.fd);
 }
 */
-void th1(int fd){
-    char buffer[BUFFER_SIZE];
-    std::string json_str;
-    ssize_t bytes_read;
-    std::cout <<'\n' <<"线程" <<std::endl;
-    while(1){
-        bytes_read = recv(fd,buffer,sizeof(buffer),0);
-        if(bytes_read <= 0)
-            break;
-        json_str += std::string(buffer,bytes_read);
-    }
-    run(json_str,fd);
-}
 
 int main(){
     
-
     int server_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (server_socket == -1) {
         std::cerr << "Failed to create socket." << std::endl;
@@ -86,7 +73,7 @@ int main(){
             std::cerr << "Failed to add socket to epoll instance." << std::endl;
             return 1;
     }
-int mm = 0;
+    int mm = 0;
     while (1) {
         struct epoll_event events[MAX_EVENTS];
         std::cout <<"wait"<<std::endl;
@@ -115,7 +102,6 @@ int mm = 0;
             } else if (events[i].events & EPOLLIN) {
                 std::cout <<"已有连接";
                 struct epoll_event event;
-                //event.events = EPOLLIN | EPOLLONESHOT;
                 event.data.fd = events[i].data.fd;
 
                 if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, event.data.fd, 0) < 0)
@@ -132,6 +118,7 @@ int mm = 0;
             }
         }
     }
+
 /*
     std::thread threads[3];
     for(int i = 0;i < 3;i++){
@@ -148,4 +135,5 @@ int mm = 0;
         }
     }
 */    
+
 }

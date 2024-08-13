@@ -102,12 +102,12 @@ enum {
 };
 
 std::string gettime();
-void fa(std::string json_str);
+void fa(std::string);
+void fa1(std::string);
 std::string shou();
 std::string shou1();
 //void mywait();
-std::string gettime();
-//void* b_thread_function(void*);
+void b_thread_function();
 void begin1();
 void begin2();
 void begin3();

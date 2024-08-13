@@ -100,6 +100,8 @@ enum {
     STATE_EXIT1,
     STATE_EXIT2
 };
+
+void th1(int);
 void run(std::string,int);
 void tooclient1s(std::string,int);
 void fhistory1s(std::string,int);
@@ -392,10 +394,6 @@ struct pperson{
 struct unonline{
     std::vector<json> un;//"un" + cid
 };
-struct pfriend{//pp
-    std::string id;
-    int co_state;//communication status
-};
 struct pgroup{//gg
     std::string gid;
     std::string g_leader;
@@ -404,7 +402,7 @@ struct pgroup{//gg
     std::vector<std::string> examine;
 };
 struct historys{//hh
-    std::string id1;
+    std::string id1;//key1 id1+id2||key2 id2+id1
     std::string id2;
     std::vector<std::string> chathistory;
     //fire[];

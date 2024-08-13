@@ -94,7 +94,7 @@ std::string shou1() {
     return json_str;
 /*
     do {
-        bytes_read = read(client_socket, buffer, BUFFER_SIZE);
+        bytes_read = read(client_socket1, buffer, BUFFER_SIZE);
         if (bytes_read == -1) {
             std::cerr << "Failed to read from socket." << std::endl;
             exit(1);
@@ -1257,7 +1257,7 @@ void gchat(){
     std::vector<fgroup> t;
     std::string json_str;
     json j;
-    p1 = {STATE_GLIST1};
+    p1 = {STATE_GLIST1,myid};
     //json_str = to_json(p1);
     j = {{"1", p1.state},{"2", p1.cid}};
     json_str = j.dump();
@@ -1297,7 +1297,7 @@ void gchat(){
                     p.cid = myid;
                     p.state = STATE_GCHAT1;
                     p.gid = gid;
-                    p.gchat = gettime()+gchat;
+                    p.gchat = gettime() + "  " + myid + " :" + gchat;
                     //json_str = to_json(p);
                     j = {{"1", p.state},{"2", p.cid},{"3", p.gid},{"4", p.gchat}};
                     json_str = j.dump();
@@ -1544,7 +1544,7 @@ void gdissolution(){
     std::cin >> gid;
     p = {STATE_GDISSOLUTION1,myid,gid};
     //json_str = to_json(p);
-    j = {{"1", p.state},{"2", p.cid},{"3", p.gid}};
+    j = {{"1", p.state},{"2", myid},{"3", gid}};
     json_str = j.dump();
     fa(json_str);
 //    mywait();
@@ -1587,6 +1587,8 @@ void gapplication(){
         std::cout << '\n' << "该群聊不存在!" << '\n';
     else if(t.state == STATE_HAVEDONE)
         std::cout << '\n' << "你已经是群成员了!" << '\n';
+    else if(t.state == STATE_HAVEADD)
+        std::cout << '\n' << "你已经发送过申请了" << '\n';
     else
         exit(1);
 }
@@ -1632,6 +1634,10 @@ void addmanager(){
     std::cin >>gid;
     std::cout << "输入你要添加为管理员的群成员的id:";
     std::cin >>id;
+    if(id == myid){
+        std::cout << "你已经是群主了!"<< std::endl;
+        return;
+    }
     p = {STATE_ADDMANAGER1,myid,gid,id};
     //json_str = to_json(p);
     j = {{"1", p.state},{"2", p.cid},{"3", p.gid},{"4", p.id}};
@@ -1668,6 +1674,10 @@ void delmanager(){
     std::cin >>gid;
     std::cout << "输入你要删除管理员的管理员的id:";
     std::cin >>id;
+    if(id == myid){
+        std::cout << "你是群主!"<< std::endl;
+        return;
+    }
     p = {STATE_DELMANAGER1,myid,gid,id};
     //json_str = to_json(p);
     j = {{"1", p.state},{"2", p.cid},{"3", p.gid},{"4", p.id}};
@@ -1704,7 +1714,7 @@ void examine(){
     int n = 0,q = 0,r = 0;
     p = {STATE_EXAMINE1,myid};
     //json_str = to_json(p);
-    j = {{"1", p.state},{"2", p.cid}};
+    j = {{"1", p.state},{"2", myid}};
     json_str = j.dump();  
     fa(json_str);
 //    mywait();
@@ -1744,8 +1754,15 @@ void examine(){
                             break;
                         }
                     }
-                    if(q)
+                    if(q){
+                        if(std::count(p2.id.begin(),p2.id.end(),id) > 0){
+                            std::cout << '\n' <<"你已经同意过了!" << '\n';
+                            q = 0;
+                            continue;
+                        }
                         p2.id.push_back(id);
+                        std::cout << '\n' << "成功添加" << id << "为群成员!" << '\n';
+                    }
                     else
                         std::cout << '\n' << "该用户不在列表中!";
                     q = 0;
