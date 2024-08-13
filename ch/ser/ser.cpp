@@ -5,14 +5,14 @@ void run(std::string json_str,int client){
     //char b = json_str[json_str.find(':')+2];
     //std::string sstate = {json_str[json_str.find(':')+1],json_str[json_str.find(':')+2]};
     //int state = std::stoi(sstate);
-    std::cout <<"run ok" <<std::endl;
+    std::cout << "处理" << std::endl;
     int state;
     std::size_t colon_pos = json_str.find(':');
     if (colon_pos != std::string::npos && colon_pos + 2 < json_str.length()) {
         std::string sstate = json_str.substr(colon_pos + 1, 2);
         state = std::stoi(sstate);
     }
-    std::cout <<state<<std::endl;
+    std::cout << "具体操作:" << state << std::endl;
     switch (state)
     {
     case STATE_TOOCLIENT1: tooclient1s(json_str,client);
@@ -83,13 +83,18 @@ void run(std::string json_str,int client){
         break;
     case STATE_DELMEMBER1: delmember1s(json_str,client);
         break;
-        
+    case STATE_EXIT1: exit1s(json_str,client);
+        break;
+    case STATE_EXIT2: exit2s(json_str,client);
+        break;
     default:
         break;
     }
+    if(state == STATE_EXIT1||state == STATE_EXIT2)
+        return;
     struct epoll_event event;
     
-    std::cout << "end"<< std::endl;
+    std::cout << "完成一次操作"<< std::endl;
     
     event.data.fd = client;
     event.events = EPOLLIN | EPOLLET;
@@ -609,18 +614,18 @@ void logoffs(std::string json_str,int client){
                         pp1.co_state = j["9"].get<std::vector<int>>();
                         pp1.groups = j["10"].get<std::vector<std::string>>();
                         pp1.applications = j["11"].get<std::vector<std::string>>();
+
                         auto it = std::find(pp1.friendid.begin(),pp1.friendid.end(),p.cid);
-                        if(it != pp1.friendid.end()){
-                            pp1.friendid.erase(it);
-                            int pos = std::distance(pp1.friendid.begin(),it);
-                            auto its = pp1.co_state.begin() + pos;
-                            pp1.co_state.erase(its);
-                        }
-                        j = {{"1", pp.id},{"2", pp.password},{"3", pp.problem},{"4", pp.awswer},{"5", pp.fd1},{"6", pp.fd2},
-                            {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
+                        pp1.friendid.erase(it);
+                        int pos = std::distance(pp1.friendid.begin(),it);
+                        auto its = pp1.co_state.begin() + pos;
+                        pp1.co_state.erase(its);
+
+                        j = {{"1", pp1.id},{"2", pp1.password},{"3", pp1.problem},{"4", pp1.awswer},{"5", pp1.fd1},{"6", pp1.fd2},
+                            {"7", pp1.ustate},{"8", pp1.friendid},{"9", pp1.co_state},{"10", pp1.groups},{"11", pp1.applications}
                         };
                         jsonstr = j.dump();
-                        reply = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id.c_str(), jsonstr.c_str());
+                        reply = (redisReply*)redisCommand(rediss, "SET %s %s", pp1.id.c_str(), jsonstr.c_str());
 
                         key1 = p.cid + tid;
                         key2 = tid + p.cid;
@@ -665,11 +670,11 @@ void logoffs(std::string json_str,int client){
                                 auto it = std::find(pp1.groups.begin(),pp1.groups.end(),tid);
                                 if(it != pp1.groups.end())
                                     pp1.groups.erase(it);
-                                j = {{"1", pp.id},{"2", pp.password},{"3", pp.problem},{"4", pp.awswer},{"5", pp.fd1},{"6", pp.fd2},
-                                    {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
+                                j = {{"1", pp1.id},{"2", pp1.password},{"3", pp1.problem},{"4", pp1.awswer},{"5", pp1.fd1},{"6", pp1.fd2},
+                                    {"7", pp1.ustate},{"8", pp1.friendid},{"9", pp1.co_state},{"10", pp1.groups},{"11", pp1.applications}
                                 };
                                 jsonstr = j.dump();
-                                reply = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id.c_str(), jsonstr.c_str());
+                                reply = (redisReply*)redisCommand(rediss, "SET %s %s", pp1.id.c_str(), jsonstr.c_str());
                             }
                             reply = (redisReply*)redisCommand(rediss, "DEL %s ", tid.c_str());
                             std::string ghid = tid + 'g';
@@ -679,16 +684,14 @@ void logoffs(std::string json_str,int client){
                         for(const auto& ttid : gg.manager){
                             if(p.cid == ttid){
                                 auto it = std::find(gg.manager.begin(),gg.manager.end(),tid);
-                                if(it != gg.manager.end())
-                                    gg.manager.erase(it);
+                                gg.manager.erase(it);
                                 break;
                             }
                         }
                         for(const auto& ttid : gg.member){
                             if(p.cid == ttid){
                                 auto it = std::find(gg.member.begin(),gg.member.end(),tid);
-                                if(it != gg.member.end())
-                                    gg.member.erase(it);
+                                gg.member.erase(it);
                                 j = {{"1", gg.gid},{"2", gg.g_leader},{"3", gg.manager},{"4", gg.member},{"5", gg.examine}};
                                 jsonstr = j.dump();
                                 reply = (redisReply*)redisCommand(rediss, "SET %s %s", gg.gid.c_str(), jsonstr.c_str());
@@ -946,9 +949,20 @@ void fadd1s(std::string json_str,int client){
         jsonstr = reply->str;
         j = json::parse(jsonstr);
         pp1.friendid = j["8"].get<std::vector<std::string>>();
+        pp1.applications = j["11"].get<std::vector<std::string>>();
         for(const auto& i : pp1.friendid){
-            if(i == p.cid){
+            if(i == p.id){
                 t.state = STATE_HAVEDONE;
+                j = {{"1", t.state}};
+                jsonstr = j.dump();
+                fa(jsonstr,client);
+                freeReplyObject(reply);
+                return;
+            }
+        }
+        for(const auto& i : pp1.applications){
+            if(i == p.id){
+                t.state = STATE_ADDHAVE;
                 j = {{"1", t.state}};
                 jsonstr = j.dump();
                 fa(jsonstr,client);
@@ -969,6 +983,15 @@ void fadd1s(std::string json_str,int client){
                 j = json::parse(jsonstr);
                 pp.fd2 = j["6"].get<int>();
                 pp.applications = j["11"].get<std::vector<std::string>>();
+                if(std::count(pp.applications.begin(),pp.applications.end(),p.cid) > 0){
+                    t.state = STATE_HAVEADD;
+                    j = {{"1", t.state}};
+                    jsonstr = j.dump();
+                    fa(jsonstr,client);
+                    freeReplyObject(reply3);
+                    freeReplyObject(reply);
+                    return;
+                }
                 pp.applications.push_back(p.cid);
                 pp.id = j["1"].get<std::string>();
                 pp.password = j["2"].get<std::string>();
@@ -1065,13 +1088,13 @@ void fdel1s(std::string json_str,int client){
     pp.friendid = j["8"].get<std::vector<std::string>>();
     pp.co_state = j["9"].get<std::vector<int>>();
     pp.groups = j["10"].get<std::vector<std::string>>();
+
     auto it = std::find(pp.friendid.begin(),pp.friendid.end(),p.cid);
-    if(it != pp.friendid.end()){
-        pp.friendid.erase(it);
-        int pos = std::distance(pp.friendid.begin(),it);
-        auto its = pp.co_state.begin() + pos;
-        pp.co_state.erase(its);
-    }
+    pp.friendid.erase(it);
+    int pos = std::distance(pp.friendid.begin(),it);
+    auto its = pp.co_state.begin() + pos;
+    pp.co_state.erase(its);
+
     j = {{"1", pp.id},{"2", pp.password},{"3", pp.problem},{"4", pp.awswer},{"5", pp.fd1},{"6", pp.fd2},
         {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
     };
@@ -1114,13 +1137,13 @@ void fdel1s(std::string json_str,int client){
     pp.friendid = j["8"].get<std::vector<std::string>>();
     pp.co_state = j["9"].get<std::vector<int>>();
     pp.groups = j["10"].get<std::vector<std::string>>();
+
     auto it1 = std::find(pp.friendid.begin(),pp.friendid.end(),p.id);
-    if(it1 != pp.friendid.end()){
-        pp.friendid.erase(it1);
-        int pos = std::distance(pp.friendid.begin(),it1);
-        auto its1 = pp.co_state.begin() + pos;
-        pp.co_state.erase(its1);
-    }
+    pp.friendid.erase(it1);
+    pos = std::distance(pp.friendid.begin(),it1);
+    auto its1 = pp.co_state.begin() + pos;
+    pp.co_state.erase(its1);
+
     j = {{"1", pp.id},{"2", pp.password},{"3", pp.problem},{"4", pp.awswer},{"5", pp.fd1},{"6", pp.fd2},
         {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
     };
@@ -1160,8 +1183,8 @@ void fblock1s(std::string json_str,int client){
     }
 
     pp1.co_state = j["9"].get<std::vector<int>>();
+
     auto it = std::find(pp1.friendid.begin(),pp1.friendid.end(),p.id);
-    if(it != pp1.friendid.end()){
         int pos = std::distance(pp1.friendid.begin(),it);
         if(pp1.co_state[pos] == STATE_BLOCK){
             t.state = STATE_HAVEDONE;
@@ -1194,7 +1217,7 @@ void fblock1s(std::string json_str,int client){
             jsonstr = j.dump();
             fa(jsonstr,client);
         }
-    }
+    
     freeReplyObject(reply);
 }
 
@@ -1227,8 +1250,8 @@ void fsearch1s(std::string json_str,int client){
     }
 
     pp1.co_state = j["9"].get<std::vector<int>>();
+
     auto it = std::find(pp1.friendid.begin(),pp1.friendid.end(),p.id);
-    if(it != pp1.friendid.end()){
         p1.state = STATE_YES;
         int pos = std::distance(pp1.friendid.begin(),it);
         p1.co_state = pp1.co_state[pos] ;
@@ -1240,7 +1263,7 @@ void fsearch1s(std::string json_str,int client){
         j = {{"1", p1.state},{"2", p1.ustate},{"3", p1.co_state}};
         jsonstr = j.dump();
         fa(jsonstr,client);
-    }
+    
     freeReplyObject(reply);
 }
 
@@ -1645,7 +1668,6 @@ void gdissolution1s(std::string json_str,int client){
                     pp.groups = j["10"].get<std::vector<std::string>>();
                     pp.applications = j["11"].get<std::vector<std::string>>();
                     auto it = std::find(pp.groups.begin(),pp.groups.end(),p.gid);
-                    if(it != pp.groups.end())
                         pp.groups.erase(it);
                     j = {{"1", pp.id},{"2", pp.password},{"3", pp.problem},{"4", pp.awswer},{"5", pp.fd1},{"6", pp.fd2},
                         {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
@@ -1669,7 +1691,6 @@ void gdissolution1s(std::string json_str,int client){
                         pp.groups = j["10"].get<std::vector<std::string>>();
                         pp.applications = j["11"].get<std::vector<std::string>>();
                         auto it = std::find(pp.groups.begin(),pp.groups.end(),p.gid);
-                        if(it != pp.groups.end())
                             pp.groups.erase(it);
                         j = {{"1", pp.id},{"2", pp.password},{"3", pp.problem},{"4", pp.awswer},{"5", pp.fd1},{"6", pp.fd2},
                             {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
@@ -1823,10 +1844,8 @@ void gexit1s(std::string json_str,int client){
                         fa(jsonstr,client);
 
                         auto it = std::find(gg.manager.begin(),gg.manager.end(),p.cid);
-                        if(it != gg.manager.end())
                             gg.manager.erase(it);
                         auto its = std::find(gg.member.begin(),gg.member.end(),p.cid);
-                        if(its != gg.member.end())
                             gg.member.erase(its);
                         j = {{"1", gg.gid},{"2", gg.g_leader},{"3", gg.manager},{"4", gg.member},{"5", gg.examine}};
                         jsonstr = j.dump();
@@ -1848,7 +1867,6 @@ void gexit1s(std::string json_str,int client){
                         pp.groups = j["10"].get<std::vector<std::string>>();
                         pp.applications = j["11"].get<std::vector<std::string>>();
                         auto it1 = std::find(pp.groups.begin(),pp.groups.end(),p.gid);
-                        if(it1 != pp.groups.end())
                             pp.groups.erase(it1);
                         j = {{"1", pp.id},{"2", pp.password},{"3", pp.problem},{"4", pp.awswer},{"5", pp.fd1},{"6", pp.fd2},
                             {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
@@ -1868,7 +1886,6 @@ void gexit1s(std::string json_str,int client){
                         jsonstr = j.dump();
                         fa(jsonstr,client);
                         auto its = std::find(gg.member.begin(),gg.member.end(),p.cid);
-                        if(its != gg.member.end())
                             gg.member.erase(its);
                         j = {{"1", gg.gid},{"2", gg.g_leader},{"3", gg.manager},{"4", gg.member},{"5", gg.examine}};
                         jsonstr = j.dump();
@@ -1890,7 +1907,6 @@ void gexit1s(std::string json_str,int client){
                         pp.groups = j["10"].get<std::vector<std::string>>();
                         pp.applications = j["11"].get<std::vector<std::string>>();
                         auto it = std::find(pp.groups.begin(),pp.groups.end(),p.gid);
-                        if(it != pp.groups.end())
                             pp.groups.erase(it);
                         j = {{"1", pp.id},{"2", pp.password},{"3", pp.problem},{"4", pp.awswer},{"5", pp.fd1},{"6", pp.fd2},
                             {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
@@ -2036,7 +2052,6 @@ void delmanager1s(std::string json_str,int client){
                         jsonstr = j.dump();
                         fa(jsonstr,client);
                         auto its = std::find(gg.manager.begin(),gg.manager.end(),p.id);
-                        if(its != gg.manager.end())
                             gg.manager.erase(its);
                         j = {{"1", gg.gid},{"2", gg.g_leader},{"3", gg.manager},{"4", gg.member},{"5", gg.examine}};
                         jsonstr = j.dump();
@@ -2141,7 +2156,6 @@ void examine3s(std::string json_str){
         for(const auto& nn : n.id){
             gg.member.push_back(nn);
             auto its = std::find(gg.examine.begin(),gg.examine.end(),nn);
-            if(its != gg.examine.end())
                 gg.examine.erase(its);
             reply1 = (redisReply*)redisCommand(rediss, "GET %s ", nn.c_str());
             jsonstr = reply1->str;
@@ -2227,10 +2241,8 @@ void delmember1s(std::string json_str,int client){
                     jsonstr = j.dump();
                     fa(jsonstr,client);
                     auto it = std::find(gg.manager.begin(),gg.manager.end(),p.id);
-                    if(it != gg.manager.end())
                         gg.manager.erase(it);
                     auto its = std::find(gg.member.begin(),gg.member.end(),p.id);
-                    if(its != gg.member.end())
                         gg.member.erase(its);
                     j = {{"1", gg.gid},{"2", gg.g_leader},{"3", gg.manager},{"4", gg.member},{"5", gg.examine}};
                     jsonstr = j.dump();
@@ -2252,7 +2264,6 @@ void delmember1s(std::string json_str,int client){
                     pp.groups = j["10"].get<std::vector<std::string>>();
                     pp.applications = j["11"].get<std::vector<std::string>>();
                     auto it1 = std::find(pp.groups.begin(),pp.groups.end(),p.gid);
-                    if(it1 != pp.groups.end())
                         pp.groups.erase(it1);
                     j = {{"1", pp.id},{"2", pp.password},{"3", pp.problem},{"4", pp.awswer},{"5", pp.fd1},{"6", pp.fd2},
                         {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
@@ -2270,7 +2281,6 @@ void delmember1s(std::string json_str,int client){
                     jsonstr = j.dump();
                     fa(jsonstr,client);
                     auto its1 = std::find(gg.member.begin(),gg.member.end(),p.id);
-                    if(its1 != gg.member.end())
                         gg.member.erase(its1);
                     j = {{"1", gg.gid},{"2", gg.g_leader},{"3", gg.manager},{"4", gg.member},{"5", gg.examine}};
                     jsonstr = j.dump();
@@ -2292,7 +2302,6 @@ void delmember1s(std::string json_str,int client){
                     pp.groups = j["10"].get<std::vector<std::string>>();
                     pp.applications = j["11"].get<std::vector<std::string>>();
                     auto it2 = std::find(pp.groups.begin(),pp.groups.end(),p.gid);
-                    if(it2 != pp.groups.end())
                         pp.groups.erase(it2);
                     j = {{"1", pp.id},{"2", pp.password},{"3", pp.problem},{"4", pp.awswer},{"5", pp.fd1},{"6", pp.fd2},
                         {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
@@ -2319,4 +2328,26 @@ void delmember1s(std::string json_str,int client){
         }
         freeReplyObject(reply);
     }
+}
+void exit1s(std::string json_str,int client){
+}
+void exit2s(std::string json_str,int client){
+    std::string jsonstr;
+    exit12 p;
+    json j;
+    int client1;
+    j = json::parse(json_str);
+    p.state = j["1"].get<int>();
+    p.myid = j["2"].get<std::string>();
+    redisReply* reply1 = (redisReply*)redisCommand(rediss, "GET %s ", p.myid.c_str());
+    jsonstr = reply1->str;
+    j = json::parse(jsonstr);
+    client1 = j["6"].get<int>();
+    if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, client1, 0) < 0)
+    {
+        perror("epoll_ctl");
+        exit(EXIT_FAILURE);
+    }
+    else
+        std::cout << "del ok"<< std::endl;
 }

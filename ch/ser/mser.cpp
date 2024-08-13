@@ -22,14 +22,13 @@ void th1(int fd){
     char buffer[BUFFER_SIZE];
     std::string json_str;
     ssize_t bytes_read;
-    std::cout <<'\n' <<"run1" <<std::endl;
+    std::cout <<'\n' <<"线程" <<std::endl;
     while(1){
         bytes_read = recv(fd,buffer,sizeof(buffer),0);
         if(bytes_read <= 0)
             break;
         json_str += std::string(buffer,bytes_read);
     }
-    std::cout <<'\n' <<"run2" << std::endl;
     run(json_str,fd);
 }
 
@@ -96,7 +95,7 @@ int mm = 0;
         for (int i = 0; i < n; i++) {
             if (events[i].data.fd == server_socket) {
                 mm++;
-                std::cout << "连接"<<mm << '\n';
+                std::cout << "新连接"<< mm << '\n';
                 int new_fd = accept(server_socket, nullptr, nullptr);
                 if (new_fd < 0) {
                     perror("accept");
@@ -114,7 +113,7 @@ int mm = 0;
                 else
                     std::cout << "connect ok"<<std::endl;
             } else if (events[i].events & EPOLLIN) {
-                std::cout <<"操作";
+                std::cout <<"已有连接";
                 struct epoll_event event;
                 //event.events = EPOLLIN | EPOLLONESHOT;
                 event.data.fd = events[i].data.fd;
@@ -128,7 +127,6 @@ int mm = 0;
                 else
                     std::cout << "del ok"<< std::endl;
                 int fd = events[i].data.fd;
-                std::cout <<"线程"<< '\n';
                 std::thread t(th1,fd);
                 t.detach();
             }

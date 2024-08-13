@@ -27,14 +27,14 @@ int main(int argc,char* argv[]) {
         return 1;
     }
 
+    myid.clear();
+
+    begin1();
+
     if (connect(client_socket1, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
         std::cerr << "Failed to connect to server." << std::endl;
         return 1;
     }
-
-    myid.clear();
-
-    begin1();
 
     std::thread t(b_thread_function);
 

@@ -89,12 +89,16 @@ enum {
     STATE_NOFRIEND,
     STATE_NOGROUP,
     STATE_HAVEDONE,
+    STATE_HAVEADD,
+    STATE_ADDHAVE,
     STATE_YES,
     STATE_NO,
     STATE_ON,
     STATE_OUT,
     STATE_BLOCK,
-    STATE_UNBLOCK
+    STATE_UNBLOCK,
+    STATE_EXIT1,
+    STATE_EXIT2
 };
 
 std::string gettime();
@@ -365,5 +369,9 @@ struct cshou{
 struct tooclient{
     int state;
     std::string cid;
+};
+struct exit12{
+    int state;
+    std::string myid;
 };
 #endif 

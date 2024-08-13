@@ -121,7 +121,7 @@ void b_thread_function(){
         p.did = j["2"].get<std::string>();
         p.gid = j["3"].get<std::string>(); 
         if(p.state == STATE_CFAPPLICATION)
-            std::cout << '\n' << "[[好友:" << p.did << " 向你发来好友申请!你可以前往查看]]" << '\n';
+            std::cout << '\n' << "[[用户:" << p.did << " 向你发来好友申请!你可以前往查看]]" << '\n';
         else if(p.state == STATE_CGAPPLICATION)
             std::cout << '\n' << "[[用户:" << p.did << " 请求加入群聊:" << p.gid << " !你可以前往查看]]" << '\n';
         else if(p.state == STATE_CFFILE)
@@ -378,11 +378,20 @@ void begin1(){
                 exit(1);
         }
         std::cout << '\n' << "注销成功!" << '\n';
-    }
-    else if(option == "5")
-        exit(0);
-    else
-        std::cout << '\n' << "请输入正确选项!";
+        }
+        else if(option == "5"){
+            std::string json_str;
+            exit12 p;
+            json j;
+            p.state = STATE_EXIT1;
+            j = {{"1", p.state},{"2", p.myid}};
+            json_str = j.dump();
+            fa(json_str);
+            sleep(1);
+            exit(0);
+        }
+        else
+            std::cout << '\n' << "请输入正确选项!";
     }
 }
 
@@ -399,8 +408,17 @@ void begin2(){
             begin3();
         else if(option == "2")
             begin4();
-        else if(option == "3")
+        else if(option == "3"){
+            std::string json_str;
+            exit12 p;
+            json j;
+            p.state = STATE_EXIT2;
+            j = {{"1", p.state},{"2", myid}};
+            json_str = j.dump();
+            fa(json_str);
+            sleep(1);
             exit(0);
+        }
         else
             std::cout << '\n' << "请输入正确选项!" << '\n';
     }
@@ -425,8 +443,17 @@ void begin3(){
             begin6();
         else if(option == "4")
             break;
-        else if(option == "5")
+        else if(option == "5"){
+            std::string json_str;
+            exit12 p;
+            json j;
+            p.state = STATE_EXIT2;
+            j = {{"1", p.state},{"2", myid}};
+            json_str = j.dump();
+            fa(json_str);
+            sleep(1);
             exit(0);
+        }
         else
             std::cout << '\n' << "请输入正确选项!";
     }
@@ -452,8 +479,17 @@ void begin4(){
             begin8();
         else if(option == "4")
             break;
-        else if(option == "5")
+        else if(option == "5"){
+            std::string json_str;
+            exit12 p;
+            json j;
+            p.state = STATE_EXIT2;
+            j = {{"1", p.state},{"2", myid}};
+            json_str = j.dump();
+            fa(json_str);
+            sleep(1);
             exit(0);
+        }
         else
             std::cout << '\n' << "请输入正确选项!";
     }
@@ -482,8 +518,17 @@ void begin5(){
             ffilehistory();
         else if(option == "5")
             break;
-        else if(option == "6")
+        else if(option == "6"){
+            std::string json_str;
+            exit12 p;
+            json j;
+            p.state = STATE_EXIT2;
+            j = {{"1", p.state},{"2", myid}};
+            json_str = j.dump();
+            fa(json_str);
+            sleep(1);
             exit(0);
+        }
         else
             std::cout << '\n' << "请输入正确选项!";
     }
@@ -516,8 +561,17 @@ void begin6(){
             fapplication();
         else if(option == "6")
             break;
-        else if(option == "7")
+        else if(option == "7"){
+            std::string json_str;
+            exit12 p;
+            json j;
+            p.state = STATE_EXIT2;
+            j = {{"1", p.state},{"2", myid}};
+            json_str = j.dump();
+            fa(json_str);
+            sleep(1);
             exit(0);
+        }
         else if(option == "8")
             funblock();
         else
@@ -548,8 +602,17 @@ void begin7(){
             gfilehistory();
         else if(option == "5")
             break;
-        else if(option == "6")
+        else if(option == "6"){
+            std::string json_str;
+            exit12 p;
+            json j;
+            p.state = STATE_EXIT2;
+            j = {{"1", p.state},{"2", myid}};
+            json_str = j.dump();
+            fa(json_str);
+            sleep(1);
             exit(0);
+        }
         else
             std::cout << '\n' << "请输入正确选项!";
     }
@@ -590,8 +653,17 @@ void begin8(){
             delmember();
         else if(option == "9")
             break;
-        else if(option == "0")
+        else if(option == "0"){
+            std::string json_str;
+            exit12 p;
+            json j;
+            p.state = STATE_EXIT2;
+            j = {{"1", p.state},{"2", myid}};
+            json_str = j.dump();
+            fa(json_str);
+            sleep(1);
             exit(0);
+        }
         else
             std::cout << '\n' << "请输入正确选项!";
     }
@@ -716,7 +788,7 @@ void fchat(){
                         break;
                     p.id = id;
                     p.cid = myid;
-                    p.chat = gettime()+chat;
+                    p.chat = gettime() + "  " + myid + " :" + chat;
                     p.state = STATE_FCHAT1;
                     //json_str = to_json(p);
                     j = {{"1", p.state},{"2", p.cid},{"3", p.id},{"4", p.chat}};
@@ -948,6 +1020,10 @@ void fadd(){
             std::cout << '\n' << "该用户不存在!" << '\n';
         else if(t.state == STATE_HAVEDONE)
             std::cout << '\n' << "他已经是你的好友了!" << '\n';
+        else if(t.state == STATE_HAVEADD)
+            std::cout << '\n' << "你已经发送过申请了!" << '\n';
+        else if(t.state == STATE_ADDHAVE)
+            std::cout << '\n' << "他已经给你发送过申请了!你可以直接同意" << '\n';
         else
             exit(1);
     }
@@ -996,9 +1072,8 @@ void fblock(){
     if(id == myid)
         std::cout << '\n' << "你不能屏蔽自己!" << '\n';
     else{
-        p = {STATE_FBLOCK1,myid,id};
         //json_str = to_json(p);
-        j = {{"1", p.state},{"2", p.cid},{"3", p.id}};
+        j = {{"1", STATE_FBLOCK1},{"2", myid},{"3", id}};
         json_str = j.dump();
         fa(json_str);
 //        mywait();
@@ -1061,6 +1136,8 @@ void funblock(){
             std::cout << '\n' << "该用户不在屏蔽列表中!" << '\n';
         m = 0;
     }
+    if(p1.id.empty())
+        return;
     p1.state = STATE_FUNBLOCK3;
     p1.cid = myid;
     //json_str = to_json(p1);
@@ -1099,7 +1176,7 @@ void fsearch(){
                 std::cout << '\n' << "在线" << '\n';
             else
                 std::cout << '\n' << "离线" << '\n';
-            if(t.co_state == STATE_YES)
+            if(t.co_state == STATE_BLOCK)
                 std::cout << '\n' << "已屏蔽" << '\n';
             else
                 std::cout << '\n' << "未屏蔽" << '\n';
@@ -1148,6 +1225,10 @@ void fapplication(){
             }
         }
         if(m){
+            if(std::count(p1.id.begin(),p1.id.end(),id) > 0){
+                std::cout << '\n' <<"你已经添加过了!" << '\n';
+                continue;
+            }
             p1.id.push_back(id);
             std::cout << '\n' << "成功添加" << id << "为好友!" << '\n';
         }

@@ -89,12 +89,16 @@ enum {
     STATE_NOFRIEND,
     STATE_NOGROUP,
     STATE_HAVEDONE,
+    STATE_HAVEADD,
+    STATE_ADDHAVE,
     STATE_YES,
     STATE_NO,
     STATE_ON,
     STATE_OUT,
     STATE_BLOCK,
-    STATE_UNBLOCK
+    STATE_UNBLOCK,
+    STATE_EXIT1,
+    STATE_EXIT2
 };
 void run(std::string,int);
 void tooclient1s(std::string,int);
@@ -131,6 +135,8 @@ void delmanager1s(std::string,int);
 void examine1s(std::string,int);
 void examine3s(std::string);
 void delmember1s(std::string,int);
+void exit1s(std::string,int);
+void exit2s(std::string,int);
 
 struct tfile{
     std::string filename;
@@ -356,6 +362,10 @@ struct examine3{
     std::string cid;
     std::string gid;
     std::vector<std::string> id;
+};
+struct exit12{
+    int state;
+    std::string myid;
 };
 struct cshou{
     int state;
