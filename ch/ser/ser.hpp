@@ -378,7 +378,7 @@ struct tooclient{
     int state;
     std::string cid;
 };
-struct pperson{
+struct pperson{//pp
     std::string id;
     std::string password;
     std::string problem;
@@ -391,11 +391,11 @@ struct pperson{
     std::vector<std::string> groups;
     std::vector<std::string> applications;
 };
-struct unonline{
+struct unonline{//un
     std::vector<json> un;//"un" + cid
 };
 struct pgroup{//gg
-    std::string gid;
+    std::string gid;//ggid gid+gid+gid
     std::string g_leader;
     std::vector<std::string> manager;
     std::vector<std::string> member;
