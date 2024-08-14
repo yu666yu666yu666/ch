@@ -193,7 +193,6 @@ void begin1(){
         std::cout << "4.注销" << '\n';
         std::cout << "5.退出" << '\n';
         std::cout << "----------------------" << '\n';
-        //std::cin >> option;
         std::getline(std::cin,option);
         if(option == "1"){
         std::string password1,password2;
@@ -207,7 +206,6 @@ void begin1(){
         json j;
         while(1){
             std::cout << '\n' << "id:";
-            //std::cin >> myid;
             std::getline(std::cin,myid);
             p1 = {STATE_REGISTER1,myid};
             //json_str = to_json(p1);
@@ -228,18 +226,18 @@ void begin1(){
         }
         while(1){
             std::cout << '\n' << "密码:";
-            std::cin >> password1;
+            std::getline(std::cin,password1);
             std::cout << '\n' << "确定密码:";
-            std::cin >> password2;
+            std::getline(std::cin,password2);
             if(password1 == password2)
                 break;
             else
                 std::cout << '\n' << "俩次密码不一致";
         }
         std::cout <<'\n' << "密保问题:";
-        std::cin >> problem;
+        std::getline(std::cin,problem);
         std::cout << '\n' <<"答案:";
-        std::cin >> awswer;
+        std::getline(std::cin,awswer);
         std::cout << '\n' << "注册成功!";
         std::cout << std::endl;
         p2 = {STATE_REGISTER2,myid,password1,problem,awswer};
@@ -258,9 +256,9 @@ void begin1(){
         json j;
         while(1){
             std::cout <<'\n' <<"id:";
-            std::cin >> myid;
+            std::getline(std::cin,myid);
             std::cout <<'\n' << "密码:";
-            std::cin >>password;
+            std::getline(std::cin,password);
             p = {STATE_LOG_ON,myid,password};
             //json_str = to_json(p);
             j = {{"1", p.state},{"2", p.cid},{"3", p.password}};
@@ -295,11 +293,11 @@ void begin1(){
         json j;
         while(1){
             std::cout << '\n' <<"id:";
-            std::cin >> myid;
+            std::getline(std::cin,myid);
             std::cout << '\n' << "密保问题:";
-            std::cin >>problem;
+            std::getline(std::cin,problem);
             std::cout << '\n' << "答案:";
-            std::cin >>awswer;
+            std::getline(std::cin,awswer);
             p1 = {STATE_FORGET1,myid,problem,awswer};
             //json_str = to_json(p1);
             j = {{"1", p1.state},{"2", p1.cid},{"3", p1.problem},{"4", p1.awswer}};
@@ -321,9 +319,9 @@ void begin1(){
         }
         while(1){
             std::cout << '\n' << "请修改密码:";
-            std::cin >> password1;
+            std::getline(std::cin,password1);
             std::cout << '\n' << "确定密码:";
-            std::cin >> password2;
+            std::getline(std::cin,password2);
             if(password1 == password2)
                 break;
             else
@@ -347,12 +345,12 @@ void begin1(){
         json j;
         while (1){
             std::cout << '\n' << "id:";
-            std::cin >> id;
+            std::getline(std::cin,id);
             while(1){
                 std::cout << '\n' << "密码：";
-                std::cin >> password1;
+                std::getline(std::cin,password1);
                 std::cout << '\n' << "再次输入密码：";
-                std::cin >> password2;
+                std::getline(std::cin,password2);
                 if(password1 == password2)
                     break;
                 else
@@ -403,7 +401,7 @@ void begin2(){
         std::cout << "2.群聊" << '\n';
         std::cout << "3.退出" << '\n';
         std::cout << "----------------------" << '\n';
-        std::cin >> option;
+        std::getline(std::cin,option);
         if(option == "1")
             begin3();
         else if(option == "2")
@@ -434,7 +432,7 @@ void begin3(){
         std::cout << "4.返回上一界面" << '\n';
         std::cout << "5.退出" << '\n';
         std::cout << "----------------------" << '\n';
-        std::cin >> option;
+        std::getline(std::cin,option);
         if(option == "1")
             flist();
         else if(option == "2")
@@ -470,7 +468,7 @@ void begin4(){
         std::cout << "4.返回上一界面" << '\n';
         std::cout << "5.退出" << '\n';
         std::cout << "----------------------" << '\n';
-        std::cin >> option;
+        std::getline(std::cin,option);
         if(option == "1")
             glist();
         else if(option == "2")
@@ -507,7 +505,7 @@ void begin5(){
         std::cout << "5.返回上一界面" << '\n';
         std::cout << "6.退出" << '\n';
         std::cout << "----------------------" << '\n';
-        std::cin >> option;
+        std::getline(std::cin,option);
         if(option == "1")
             fchat();
         else if(option == "2")
@@ -548,7 +546,7 @@ void begin6(){
         std::cout << "6.返回上一界面" << '\n';
         std::cout << "7.退出" << '\n';
         std::cout << "----------------------" << '\n';
-        std::cin >> option;
+        std::getline(std::cin,option);
         if(option == "1")
             fadd();
         else if(option == "2")
@@ -591,7 +589,7 @@ void begin7(){
         std::cout << "5.返回上一界面" << '\n';
         std::cout << "6.退出" << '\n';
         std::cout << "----------------------" << '\n';
-        std::cin >> option;
+        std::getline(std::cin,option);
         if(option == "1")
             gchat();
         else if(option == "2")
@@ -634,7 +632,7 @@ void begin8(){
         std::cout << "9.返回上一界面" << '\n';
         std::cout << "0.退出" << '\n';
         std::cout << "----------------------" << '\n';
-        std::cin >> option;
+        std::getline(std::cin,option);
         if(option == "1")
             gcreation();
         else if(option == "2")
@@ -766,13 +764,17 @@ void fchat(){
         t.push_back(t1);
     }
     for(const auto& ffriend : t){
-        std::cout << '\n' << "id:" << ffriend.id << ",state:" << ffriend.ustate;
+        std::cout << '\n' << "id:" << ffriend.id << ",state:";
+        if(ffriend.ustate == STATE_ON)
+            std::cout << "在线";
+        else
+            std::cout << "离线";
     }
     std::cout << std::endl;
 
     while(1){
         std::cout << '\n' << "输入你要聊天的用户的id:(输入“退出退出退出”离开聊天界面)";
-        std::cin >> id;
+        std::getline(std::cin,id);
         if(id == "退出退出退出")
             break;
         if(id == myid)
@@ -783,9 +785,14 @@ void fchat(){
                 ccid = id;
                 std::cout << '\n' << "开始聊天:(输入“退出退出退出”离开和此用户聊天界面)";
                 while(1){
-                    std::cin >> chat;
+                    std::getline(std::cin,chat);
                     if(chat == "退出退出退出")
                         break;
+                    std::size_t pos = chat.find("\u001b");
+                    if(pos != std::string::npos){
+                        std::cout << "请正确输入!" << '\n';
+                        continue;
+                    }
                     p.id = id;
                     p.cid = myid;
                     p.chat = gettime() + "  " + myid + " :" + chat;
@@ -837,7 +844,7 @@ void fsendfile(){
 
     while(1){
         std::cout << '\n' << "输入你要发送文件的用户的id:(输入“退出退出退出”离开发送文件界面)";
-        std::cin >> id;
+        std::getline(std::cin,id);
         if(id == "退出退出退出")
             break;
         for(const auto& str : t){
@@ -845,7 +852,7 @@ void fsendfile(){
                 m = 1;
                 p.id = id;
                 std::cout<< '\n' << "要发送的文件:";
-                std::cin >> filename;
+                std::getline(std::cin,filename);
                 break;
             }
         }
@@ -882,7 +889,7 @@ void fhistory(){
     json j;
     while(1){
         std::cout << '\n' << "你要查询与谁的聊天记录?输入id:";
-        std::cin >> id;
+        std::getline(std::cin,id);
         p = {STATE_FHISTORY1,myid,id};
         if(id == myid){
             std::cout << '\n' << "你不能查看和自己的聊天记录!";
@@ -946,7 +953,7 @@ void ffilehistory(){
 
     while(1){
         std::cout << '\n' << "输入你要查看文件记录的用户的id:(输入“退出退出退出”离开查看文件界面)";
-        std::cin >> id;
+        std::getline(std::cin,id);
         if(id == "退出退出退出")
             break;
         for(const auto& str : t){
@@ -1000,7 +1007,7 @@ void fadd(){
     yesorno t;
     json j;
     std::cout << '\n' << "请输入你要添加好友的id:";
-    std::cin >> id;
+    std::getline(std::cin,id);
     if(id ==myid)
         std::cout << '\n' << "你不能添加自己为好友!" << '\n';
     else{
@@ -1036,7 +1043,7 @@ void fdel(){
     yesorno t;
     json j;
     std::cout << '\n' << "请输入你要删除好友的id:";
-    std::cin >> id;
+    std::getline(std::cin,id);
     if(id == myid)
         std::cout << '\n' << "你不能删除自己!" << '\n';
     else{
@@ -1068,7 +1075,7 @@ void fblock(){
     yesorno t;
     json j;
     std::cout << '\n' << "请输入你要屏蔽好友的id:";
-    std::cin >> id;
+    std::getline(std::cin,id);
     if(id == myid)
         std::cout << '\n' << "你不能屏蔽自己!" << '\n';
     else{
@@ -1119,7 +1126,7 @@ void funblock(){
     std::cout << std::endl;
     while(1){
         std::cout << "输入你要解除屏蔽的用户的id:(输入“退出退出退出”离开解除屏蔽界面)";
-        std::cin >> id;
+        std::getline(std::cin,id);
         if(id == "退出退出退出")
             break;
         for(const auto& str : t.id){
@@ -1154,7 +1161,7 @@ void fsearch(){
     fsearch2 t;
     json j;
     std::cout << '\n' << "请输入你要查询好友的id:";
-    std::cin >> id;
+    std::getline(std::cin,id);
     if(id == myid)
         std::cout << '\n' << "你不能搜索自己!" << '\n';
     else{
@@ -1215,7 +1222,7 @@ void fapplication(){
     std::cout << std::endl;
     while(1){
         std::cout << "输入你同意的用户的id:(输入“退出退出退出”离开好友申请界面)";
-        std::cin >> id;
+        std::getline(std::cin,id);
         if(id == "退出退出退出")
             break;
         for(const auto& str : t.id){
@@ -1282,7 +1289,7 @@ void gchat(){
 
     while(1){
         std::cout << "输入你要聊天的群gid:(输入“退出退出退出”离开聊天界面)";
-        std::cin >> gid;
+        std::getline(std::cin,gid);
         if(gid == "退出退出退出")
             break;
         for(const auto& str : t){
@@ -1291,9 +1298,14 @@ void gchat(){
                 m = 1;
                 std::cout << '\n' << "开始聊天:(输入“退出退出退出”离开和此群聊天界面)";
                 while(1){
-                    std::cin >> gchat;
+                    std::getline(std::cin,gchat);
                     if(gchat == "退出退出退出")
                         break;
+                    std::size_t pos = gchat.find("\u001b");
+                    if(pos != std::string::npos){
+                        std::cout << "请正确输入!" << '\n';
+                        continue;
+                    }
                     p.cid = myid;
                     p.state = STATE_GCHAT1;
                     p.gid = gid;
@@ -1348,7 +1360,7 @@ void gsendfile(){
 
     while(1){
         std::cout << '\n' << "输入你要发送文件的群的gid:(输入“退出退出退出”离开发送文件界面)";
-        std::cin >> gid;
+        std::getline(std::cin,gid);
         if(gid == "退出退出退出")
             break;
         for(const auto& str : t){
@@ -1356,7 +1368,7 @@ void gsendfile(){
                 m = 1;
                 p.gid = gid;
                 std::cout<< '\n' << "要发送的文件:";
-                std::cin >> filename;
+                std::getline(std::cin,filename);
                 break;
             }
         }
@@ -1395,7 +1407,7 @@ void ghistory(){
     json j;
     while(1){
         std::cout << '\n' << "你要查询哪个群的聊天记录?输入gid:";
-        std::cin >> gid;
+        std::getline(std::cin,gid);
         p = {STATE_GHISTORY1,myid,gid};
         //json_str = to_json(p);
         j = {{"1", p.state},{"2", p.cid},{"3", p.gid}};
@@ -1458,7 +1470,7 @@ void gfilehistory(){
 
     while(1){
         std::cout << '\n' << "输入你要查看文件记录的群的gid:(输入“退出退出退出”离开查看文件界面)";
-        std::cin >> gid;
+        std::getline(std::cin,gid);
         if(gid == "退出退出退出")
             break;
         for(const auto& str : t){
@@ -1513,7 +1525,7 @@ void gcreation(){
     json j;
     while(1){
         std::cout << '\n' << "输入你要创建的群聊的gid:";
-        std::cin >>gid;
+        std::getline(std::cin,gid);
         p = {STATE_GCREATION1,myid,gid};
         //json_str = to_json(p);
         j = {{"1", p.state},{"2", p.cid},{"3", p.gid}};
@@ -1541,7 +1553,7 @@ void gdissolution(){
     yesorno t;
     json j;
     std::cout << '\n' << "输入你要销毁的群聊的gid:";
-    std::cin >> gid;
+    std::getline(std::cin,gid);
     p = {STATE_GDISSOLUTION1,myid,gid};
     //json_str = to_json(p);
     j = {{"1", p.state},{"2", myid},{"3", gid}};
@@ -1570,7 +1582,7 @@ void gapplication(){
     yesorno t;
     json j;
     std::cout << '\n' << "请输入你要申请群聊的gid:";
-    std::cin >> gid;
+    std::getline(std::cin,gid);
     p = {STATE_GAPPLICATION1,myid,gid};
     //json_str = to_json(p);
     j = {{"1", p.state},{"2", p.cid},{"3", p.gid}};
@@ -1600,7 +1612,7 @@ void gexit(){
     yesorno t;
     json j;
     std::cout << '\n' << "请输入你要退出群聊的gid:";
-    std::cin >> gid;
+    std::getline(std::cin,gid);
     p = {STATE_GEXIT1,myid,gid};
     //json_str = to_json(p);
     j = {{"1", p.state},{"2", p.cid},{"3", p.gid}};
@@ -1631,9 +1643,9 @@ void addmanager(){
     yesorno t;
     json j;
     std::cout << "输入你要添加管理员的群聊的gid:";
-    std::cin >>gid;
+    std::getline(std::cin,gid);
     std::cout << "输入你要添加为管理员的群成员的id:";
-    std::cin >>id;
+    std::getline(std::cin,id);
     if(id == myid){
         std::cout << "你已经是群主了!"<< std::endl;
         return;
@@ -1671,9 +1683,9 @@ void delmanager(){
     yesorno t;
     json j;
     std::cout << "输入你要删除管理员的群聊的gid:";
-    std::cin >>gid;
+    std::getline(std::cin,gid);
     std::cout << "输入你要删除管理员的管理员的id:";
-    std::cin >>id;
+    std::getline(std::cin,id);
     if(id == myid){
         std::cout << "你是群主!"<< std::endl;
         return;
@@ -1737,14 +1749,14 @@ void examine(){
     std::cout << std::endl;
     while(1){
         std::cout << '\n' << "输入你要审核的群聊的gid:(输入“退出退出退出”离开此界面)";
-        std::cin >> gid;
+        std::getline(std::cin,gid);
         if(gid == "退出退出退出")
             break;
         for(const auto& examine2 : t){
             if(gid == examine2.gid){
                 while(1){
                     std::cout << '\n' << "输入你要同意进入该群聊的用户的id:(输入“退出退出退出”离开此群聊审核界面)";
-                    std::cin >> id;
+                    std::getline(std::cin,id);
                     if(id == "退出退出退出")
                         break;
                     for(const auto& str : examine2.id){
@@ -1802,9 +1814,9 @@ void delmember(){
     yesorno t;
     json j;
     std::cout << "输入你要删除群成员的群聊的gid:";
-    std::cin >>gid;
+    std::getline(std::cin,gid);
     std::cout << "输入你要删除的群成员的id:";
-    std::cin >>id;
+    std::getline(std::cin,id);
     if(id == myid)
         std::cout << '\n' << "你不能删除自己!请选择退出群聊选项" << '\n';
     else{

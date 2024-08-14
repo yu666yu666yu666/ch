@@ -17,6 +17,7 @@
 #include <fstream>
 #include <string>
 #include <cstddef>
+#include <csignal>
 #include <thread>
 #include <mutex>
 #include <hiredis/hiredis.h>

@@ -3,6 +3,20 @@
 
 int main(int argc,char* argv[]) {
     
+    struct sigaction sa;
+    std::memset(&sa,0,sizeof(sa));
+    sa.sa_handler = SIG_IGN;
+    if(sigaction(SIGINT,&sa,nullptr) < 0){
+        perror("sigaction");
+        return 1;
+    }
+    std::memset(&sa,0,sizeof(sa));
+    sa.sa_handler = SIG_IGN;
+    if(sigaction(SIGTSTP,&sa,nullptr) < 0){
+        perror("sigaction");
+        return 1;
+    }
+
     client_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (client_socket == -1) {
         std::cerr << "Failed to create socket." << std::endl;
@@ -37,6 +51,6 @@ int main(int argc,char* argv[]) {
     }
 
     std::thread t(b_thread_function);
-
+ 
     begin2();
 }

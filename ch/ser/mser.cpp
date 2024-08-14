@@ -48,6 +48,14 @@ int main(){
         exit(EXIT_FAILURE);
     }
 
+    setsockopt(server_socket,SOL_SOCKET,SO_KEEPALIVE,&opt,sizeof(opt));
+    int keepalive_time = 60; 
+    int keepalive_interval = 10; 
+    int keepalive_probes = 5; 
+    setsockopt(server_socket, IPPROTO_TCP, TCP_KEEPIDLE, &keepalive_time, sizeof(keepalive_time));
+    setsockopt(server_socket, IPPROTO_TCP, TCP_KEEPINTVL, &keepalive_interval, sizeof(keepalive_interval));
+    setsockopt(server_socket, IPPROTO_TCP, TCP_KEEPCNT, &keepalive_probes, sizeof(keepalive_probes));
+
     struct sockaddr_in server_addr,client_addr;
     socklen_t client_len;
     memset(&server_addr, 0, sizeof(server_addr));
