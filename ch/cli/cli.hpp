@@ -28,7 +28,6 @@ using json = nlohmann::json;
 #define SERVER_PORT 8888
 #define MAX_EVENTS 1024
 #define BUFFER_SIZE 1024
-#define IP "209.141.34.136"
 
 int client_socket; 
 int client_socket1;

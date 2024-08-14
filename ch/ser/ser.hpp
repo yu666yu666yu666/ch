@@ -29,7 +29,7 @@ using json = nlohmann::json;
 #define SERVER_PORT 8888
 #define MAX_EVENTS 1024
 #define BUFFER_SIZE 1024
-#define IP "127.0.0.1"
+#define IP "10.30.0.118"
 
 redisContext* rediss;
 int epoll_fd;
