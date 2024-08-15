@@ -105,6 +105,7 @@ std::string shou1() {
 }
 
 void b_thread_function(){
+    usleep(50000);
     std::string json_str;
     cshou p;
     json j;
@@ -593,7 +594,7 @@ void begin7(){
         if(option == "1")
             gchat();
         else if(option == "2")
-            gsendfile;
+            gsendfile();
         else if(option == "3")
             ghistory();
         else if(option == "4")
@@ -850,10 +851,12 @@ void fsendfile(){
             if(id == str.id){
                 m = 1;
                 p.id = id;
-                std::cout<< '\n' << "要发送的文件:";
+                std::cout<< '\n' << "要发送的文件:(输入“退出退出退出”离开此界面)";
                 std::getline(std::cin,p.filename);
                 while (!std::filesystem::exists(p.filename)){
-                    std::cout << "该文件不存在，请重新输入" << std::endl;
+                    if(p.filename == "退出退出退出")
+                        return;
+                    std::cout << "该文件不存在，请重新输入(输入“退出退出退出”离开此界面)" << std::endl;
                     std::getline(std::cin,p.filename);
                 }
                 break;
@@ -875,6 +878,7 @@ void fsendfile(){
             j = {{"1", p.state},{"2", p.cid},{"3", p.id},{"4", p.filename},{"5", p.filesize}};
             json_str = j.dump();
             fa(json_str);
+            sleep(3);
             off_t offset = 0;
             ssize_t bytes_sent = 0;
             while (offset < file_stat.st_size){
@@ -883,10 +887,11 @@ void fsendfile(){
                     std::cerr <<"sendfile err" << '\n';
                     break;
                 }
-                 std::cout << "\33[2K\r" << p.filename << ": " << (int)(((float)offset / file_stat.st_size) * 100) << "%" << std::flush;
+                 std::cout << p.filename << ": " << (int)(((float)offset / file_stat.st_size) * 100) << "%" << std::flush;
             }
+            std::cout  << '\n'<<file_stat.st_size << '|'<< offset;
             std::cout << std::endl;
-            close(file);    
+            close(file);    /*
             json_str = shou();
             //t = from_json<yesorno>(json_str);
             j = json::parse(json_str);
@@ -895,6 +900,7 @@ void fsendfile(){
                 std::cout << "发送成功!" << std::endl;
             else if(tt.state == STATE_NO)
                 std::cout << "发送失败!" <<std::endl;
+                */
         }
         else
             std::cout << '\n' << "他不是你的好友!";
@@ -967,7 +973,7 @@ void frecvfile(){
                 int len;
                 char buffer[10240];
                 off_t total_received = 0;
-                    
+                sleep(5);
                 while (total_received < tt.filesize){
                     len = recv(client_socket, buffer, (total_received + 10240 > tt.filesize) ? tt.filesize - total_received : 10240, 0);
                     if (len <= 0){
@@ -1399,10 +1405,12 @@ void gsendfile(){
             if(gid == str.gid){
                 m = 1;
                 p.gid = gid;
-                std::cout<< '\n' << "要发送的文件:";
+                std::cout<< '\n' << "要发送的文件:(输入“退出退出退出”离开此界面)";
                 std::getline(std::cin,p.filename);
                 while (!std::filesystem::exists(p.filename)){
-                    std::cout << "该文件不存在，请重新输入" << std::endl;
+                    if(p.filename == "退出退出退出")
+                        return;
+                    std::cout << "该文件不存在，请重新输入(输入“退出退出退出”离开此界面)" << std::endl;
                     std::getline(std::cin,p.filename);
                 }
                 break;
@@ -1424,6 +1432,7 @@ void gsendfile(){
             j = {{"1", p.state},{"2", p.cid},{"3", p.gid},{"4", p.filename},{"5", p.filesize}};
             json_str = j.dump();
             fa(json_str);
+            sleep(3);
             off_t offset = 0;
             ssize_t bytes_sent = 0;
             while (offset < file_stat.st_size){
@@ -1435,7 +1444,7 @@ void gsendfile(){
                  std::cout << "\33[2K\r" << p.filename << ": " << (int)(((float)offset / file_stat.st_size) * 100) << "%" << std::flush;
             }
             std::cout << std::endl;
-            close(file);    
+            close(file);    /*
             json_str = shou();
             //t = from_json<yesorno>(json_str);
             j = json::parse(json_str);
@@ -1443,7 +1452,7 @@ void gsendfile(){
             if(tt.state == STATE_YES)
                 std::cout << "发送成功!" << std::endl;
             else if(tt.state == STATE_NO)
-                std::cout << "发送失败!" <<std::endl;
+                std::cout << "发送失败!" <<std::endl;*/
         }
         else
             std::cout << '\n' << "你不在该群!";
@@ -1512,7 +1521,7 @@ void grecvfile(){
                 int len;
                 char buffer[10240];
                 off_t total_received = 0;
-                    
+                sleep(5);
                 while (total_received < tt.filesize){
                     len = recv(client_socket, buffer, (total_received + 10240 > tt.filesize) ? tt.filesize - total_received : 10240, 0);
                     if (len <= 0){

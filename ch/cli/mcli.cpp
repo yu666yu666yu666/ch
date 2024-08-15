@@ -49,6 +49,9 @@ int main(int argc,char* argv[]) {
     }
 
     std::thread t(b_thread_function);
- 
+
     begin2();
 }
+
+
+

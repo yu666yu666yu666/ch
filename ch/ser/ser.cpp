@@ -69,11 +69,13 @@ void run(std::string json_str,int client){
     case STATE_EXIT2: exit2s(json_str,client);break;
     default:break;
     }
-    if(state == STATE_EXIT1||state == STATE_EXIT2)
+    if(state == STATE_EXIT1||state == STATE_EXIT2){
+        std::cout << "完成一次操作" << std::endl;
         return;
+    }
     struct epoll_event event;
     
-    std::cout << "完成一次操作"<< std::endl;
+    std::cout << "完成一次操作" << std::endl;
     
     event.data.fd = client;
     event.events = EPOLLIN | EPOLLET;
@@ -134,12 +136,17 @@ void tooclient1s(std::string json_str,int client){
                 jsonstr = j.dump();
                 redisReply* reply2 = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id.c_str(), jsonstr.c_str());
 
-                sleep(1);
                 std::string unid = "un" + p.cid;
                     reply1 = (redisReply*)redisCommand(rediss, "GET %s ", unid.c_str());
                     jsonstr = reply1->str;
                     j = json::parse(jsonstr);
                     un.un = j["1"].get<std::vector<json>>();
+                    if(un.un.empty()){
+                        freeReplyObject(reply);
+                        freeReplyObject(reply1);
+                        freeReplyObject(reply2);
+                        return;
+                    }
                     for(const auto& u : un.un){
                         jsonstr = u.dump();
                         usleep(50000);
@@ -295,7 +302,6 @@ void ghistory1s(std::string json_str,int client){
 }
 
 void pregister1s(std::string json_str,int client){
-    std::cout << "register"<<std::endl;
     pregister1 p;
     json j;
     yesorno t;
@@ -342,13 +348,14 @@ void pregister2s(std::string json_str,int client){
     pp.problem = p.problem;
     pp.awswer = p.awswer;
     pp.fd1 = client;
+    pp.fd2 = 66;
     pp.ustate = STATE_ON;
     j = {{"1", pp.id},{"2", pp.password},{"3", pp.problem},{"4", pp.awswer},{"5", pp.fd1},{"6", pp.fd2},
         {"7", pp.ustate},{"8", pp.friendid},{"9", pp.co_state},{"10", pp.groups},{"11", pp.applications}
     };
     jsonstr = j.dump();
+    redisReply* reply = (redisReply*)redisCommand(rediss, "SET %s %s", pp.id.c_str(), jsonstr.c_str());
     std::cout <<pp.id<< std::endl;
-    redisReply* reply = (redisReply*)redisCommand(rediss, "SET %s %s", p.cid.c_str(), jsonstr.c_str());
     unonline un;
     std::string unid = "un" + p.cid;
     j = {{"1",un.un}};
@@ -946,30 +953,32 @@ void fsendfile1s(std::string json_str,int client){
         std::cerr << "Failed to open file" << std::endl;
         return;
     }
-
+    sleep(5);
     int len;
     char buffer[10240];
     off_t total_received = 0;
-
+   
     while (total_received < p.filesize){
         len = recv(client, buffer, sizeof(buffer), 0);
-        if (len < 0){
-            perror("recv");
+        if (len <= 0){
+            if(len < 0)
+                perror("recv");
             return;
         }
 
         fwrite(buffer, 1, len, fp);
         total_received += len;
-        std::cout << "\33[2K\r" << p.filename << ": " << (int)(((float)total_received / p.filesize) * 100) << "%" << std::flush;
+        std::cout << "    " << (int)(((float)total_received / p.filesize) * 100) << "%" << std::flush;
     }
+    std::cout << '\n'<<p.filesize << '|'<<total_received;
     std::cout << std::endl;
     fclose(fp);
     if (total_received == p.filesize){
         std::cout << "File received successfully" << std::endl;
-        t.state = STATE_YES;
+        /*t.state = STATE_YES;
         j = {{"1", t.state}};
         jsonstr = j.dump();
-        fa(jsonstr,client);
+        fa(jsonstr,client);*/
 
     std::string key1 = p.cid + p.id;
     std::string key2 = p.id + p.cid;
@@ -1034,7 +1043,7 @@ void fsendfile1s(std::string json_str,int client){
                 hh.filehistory.push_back(filename);
                 j = {{"1", hh.id1},{"2", hh.id2},{"3", hh.chathistory},{"4", hh.filename},{"5", hh.filehistory}};
                 jsonstr = j.dump();
-                reply = (redisReply*)redisCommand(rediss, "SET %s %s", key1.c_str(), jsonstr.c_str());
+                reply = (redisReply*)redisCommand(rediss, "SET %s %s", key2.c_str(), jsonstr.c_str());
                 
                 reply = (redisReply*)redisCommand(rediss, "GET %s ", p.id.c_str());
                 jsonstr = reply->str;
@@ -1068,10 +1077,10 @@ void fsendfile1s(std::string json_str,int client){
     }
     else{
         std::cerr << "File size mismatch" << std::endl;
-        t.state = STATE_NO;
+       /*t.state = STATE_NO;
         j = {{"1", t.state}};
         jsonstr = j.dump();
-        fa(jsonstr,client);
+        fa(jsonstr,client);*/ 
     }
 }
 
@@ -1182,7 +1191,7 @@ void frecvfile3s(std::string json_str,int client){
                 j = {{"1", t.filesize}};
                 jsonstr = j.dump();
                 fa(jsonstr,client);
-
+                sleep(5);
                 off_t offset = 0;
                 ssize_t bytes_sent = 0;
                 while (offset < file_stat.st_size){
@@ -1220,7 +1229,7 @@ void frecvfile3s(std::string json_str,int client){
                 j = {{"1", t.filesize}};
                 jsonstr = j.dump();
                 fa(jsonstr,client);
-
+                sleep(5);
                 off_t offset = 0;
                 ssize_t bytes_sent = 0;
                 while (offset < file_stat.st_size){
@@ -1867,7 +1876,7 @@ void gsendfile1s(std::string json_str,int client){
         std::cerr << "Failed to open file" << std::endl;
         return;
     }
-
+    sleep(5);
     int len;
     char buffer[10240];
     off_t total_received = 0;
@@ -1881,16 +1890,16 @@ void gsendfile1s(std::string json_str,int client){
 
         fwrite(buffer, 1, len, fp);
         total_received += len;
-        std::cout << "\33[2K\r" << p.filename << ": " << (int)(((float)total_received / p.filesize) * 100) << "%" << std::flush;
+        std::cout <<"   " << (int)(((float)total_received / p.filesize) * 100) << "%" << std::flush;
     }
     std::cout << std::endl;
     fclose(fp);
     if (total_received == p.filesize){
         std::cout << "File received successfully" << std::endl;
-        t.state = STATE_YES;
+       /* t.state = STATE_YES;
         j = {{"1", t.state}};
         jsonstr = j.dump();
-        fa(jsonstr,client);
+        fa(jsonstr,client);*/
     
     std::string ghid = p.gid + "g";
     redisReply* reply = (redisReply*)redisCommand(rediss, "EXISTS %s", ghid.c_str());
@@ -1987,10 +1996,10 @@ void gsendfile1s(std::string json_str,int client){
     }
     else{
         std::cerr << "File size mismatch" << std::endl;
-        t.state = STATE_NO;
+       /* t.state = STATE_NO;
         j = {{"1", t.state}};
         jsonstr = j.dump();
-        fa(jsonstr,client);
+        fa(jsonstr,client);*/
     }
 }
 
@@ -2025,7 +2034,7 @@ void grecvfile1s(std::string json_str,int client){
         return;
     }
 
-    ghid = p.gid + p.gid;
+    ghid = p.gid + "g";
     reply = (redisReply*)redisCommand(rediss, "EXISTS %s", ghid.c_str());
     if(reply == nullptr){
         exit(1);
@@ -2060,7 +2069,7 @@ void grecvfile3s(std::string json_str,int client){
     p.gid = j["3"].get<std::string>();
     p.filename = j["4"].get<std::string>();
 
-    ghid = p.gid + p.gid;
+    ghid = p.gid + "g";
     redisReply* reply = (redisReply*)redisCommand(rediss, "EXISTS %s", ghid.c_str());
     if(reply == nullptr){
         exit(1);
@@ -2076,7 +2085,7 @@ void grecvfile3s(std::string json_str,int client){
                 auto its = std::find(gh.gfilename.begin(),gh.gfilename.end(),p.filename);
                 int pos = std::distance(gh.gfilename.begin(),its);
                 std::string filename = gh.gfilehistory[pos];
-
+                
                 int file = open(filename.c_str(), O_RDONLY);
                 if (file == -1){
                     std::cerr << "Failed to open file" << std::endl;
@@ -2088,7 +2097,7 @@ void grecvfile3s(std::string json_str,int client){
                 j = {{"1", t.filesize}};
                 jsonstr = j.dump();
                 fa(jsonstr,client);
-
+                sleep(5);
                 off_t offset = 0;
                 ssize_t bytes_sent = 0;
                 while (offset < file_stat.st_size){
