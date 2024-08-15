@@ -5,8 +5,11 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/sendfile.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include <sys/epoll.h>
 #include <vector>
@@ -17,10 +20,12 @@
 #include <fstream>
 #include <string>
 #include <cstddef>
-#include <csignal>
 #include <thread>
 #include <mutex>
+#include <fcntl.h>
 #include <hiredis/hiredis.h>
+#include <csignal>
+#include <cstring>
 //#include "nlohmann/json.hpp"
 #include "/home/yu666/Desktop/ch/json/single_include/nlohmann/json.hpp" 
 using json = nlohmann::json;
@@ -47,9 +52,10 @@ enum {
     STATE_GLIST1,
     STATE_FCHAT1,
     STATE_FSENDFILE1,
+    STATE_FRECVFILE1,
+    STATE_FRECVFILE2,
     STATE_FHISTORY1,
     STATE_FHISTORY2,
-    STATE_FFILEHISTORY1,
     STATE_FADD1,
     STATE_FDEL1,
     STATE_FBLOCK1,
@@ -62,8 +68,9 @@ enum {
     STATE_GCHAT1,
     STATE_GHISTORY1,
     STATE_GHISTORY2,
-    STATE_GFILEHISTORY1,
     STATE_GSENDFILE1,
+    STATE_GRECVFILE1,
+    STATE_GRECVFILE2,
     STATE_GCREATION1,
     STATE_GDISSOLUTION1,
     STATE_GAPPLICATION1,
@@ -120,8 +127,8 @@ void begin7();
 void begin8();
 void fchat();
 void fsendfile();
+void frecvfile();
 void fhistory();
-void ffilehistory();
 void fadd();
 void fdel();
 void fblock();
@@ -130,8 +137,8 @@ void fsearch();
 void fapplication();
 void gchat();
 void gsendfile();
+void grecvfile();
 void ghistory();
-void gfilehistory();
 void gcreation();
 void gdissolution();
 void gapplication();
@@ -214,18 +221,25 @@ struct fsendfile1{
     std::string cid;
     std::string id;
     std::string filename;
-    std::size_t filesize;
-    std::vector<char> content;
+    long long int filesize;
 };
-struct ffilehistory1{
+struct frecvfile1{
     int state;
     std::string cid;
     std::string id;
 };
-struct ffilehistory2{
+struct frecvfile2{
+    int state;
+    std::vector<std::string> filename;
+};
+struct frecvfile3{
+    int state;
+    std::string cid;
+    std::string id;
     std::string filename;
-    std::size_t filesize;
-    std::vector<char> content;
+};
+struct frecvfile4{
+    long long int filesize;
 };
 struct fadd1{
     int state;
@@ -296,18 +310,25 @@ struct gsendfile1{
     std::string cid;
     std::string gid;
     std::string filename;
-    std::size_t filesize;
-    std::vector<char> content;
+    long long int filesize;
 };
-struct gfilehistory1{
+struct grecvfile1{
     int state;
     std::string cid;
     std::string gid;
 };
-struct gfilehistory2{
+struct grecvfile2{
+    int state;
+    std::vector<std::string> filename;
+};
+struct grecvfile3{
+    int state;
+    std::string cid;
+    std::string gid;
     std::string filename;
-    std::size_t filesize;
-    std::vector<char> content;
+};
+struct grecvfile4{
+    long long int filesize;
 };
 struct gcreation1{
     int state;

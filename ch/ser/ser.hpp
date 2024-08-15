@@ -5,6 +5,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/sendfile.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
@@ -22,6 +24,8 @@
 #include <mutex>
 #include <fcntl.h>
 #include <hiredis/hiredis.h>
+#include <csignal>
+#include <cstring>
 //#include "nlohmann/json.hpp"
 #include "/home/yu666/Desktop/ch/json/single_include/nlohmann/json.hpp"
 using json = nlohmann::json;
@@ -48,9 +52,10 @@ enum {
     STATE_GLIST1,
     STATE_FCHAT1,
     STATE_FSENDFILE1,
+    STATE_FRECVFILE1,
+    STATE_FRECVFILE2,
     STATE_FHISTORY1,
     STATE_FHISTORY2,
-    STATE_FFILEHISTORY1,
     STATE_FADD1,
     STATE_FDEL1,
     STATE_FBLOCK1,
@@ -63,8 +68,9 @@ enum {
     STATE_GCHAT1,
     STATE_GHISTORY1,
     STATE_GHISTORY2,
-    STATE_GFILEHISTORY1,
     STATE_GSENDFILE1,
+    STATE_GRECVFILE1,
+    STATE_GRECVFILE2,
     STATE_GCREATION1,
     STATE_GDISSOLUTION1,
     STATE_GAPPLICATION1,
@@ -116,8 +122,9 @@ void logoffs(std::string,int);
 void flist1s(std::string,int);
 void glist1s(std::string,int);
 void fchat1s(std::string);
-void fsendfile1s(std::string);
-void ffilehistory1s(std::string);
+void fsendfile1s(std::string,int);
+void frecvfile1s(std::string,int);
+void frecvfile3s(std::string,int);
 void fadd1s(std::string,int);
 void fdel1s(std::string,int);
 void fblock1s(std::string,int);
@@ -127,8 +134,9 @@ void fsearch1s(std::string,int);
 void fapplication1s(std::string,int);
 void fapplication3s(std::string);
 void gchat1s(std::string);
-void gsendfile1s(std::string);
-void gfilehistory1s(std::string);
+void gsendfile1s(std::string,int);
+void grecvfile1s(std::string,int);
+void grecvfile3s(std::string,int);
 void gcreation1s(std::string,int);
 void gdissolution1s(std::string,int);
 void gapplication1s(std::string,int);
@@ -140,12 +148,13 @@ void examine3s(std::string);
 void delmember1s(std::string,int);
 void exit1s(std::string,int);
 void exit2s(std::string,int);
-
+/*
 struct tfile{
     std::string filename;
     std::size_t filesize;
     std::vector<char> content;
 };
+*/
 struct pregister1{
     int state;
     std::string cid;
@@ -219,18 +228,25 @@ struct fsendfile1{
     std::string cid;
     std::string id;
     std::string filename;
-    std::size_t filesize;
-    std::vector<char> content;
+    long long int filesize;
 };
-struct ffilehistory1{
+struct frecvfile1{
     int state;
     std::string cid;
     std::string id;
 };
-struct ffilehistory2{
+struct frecvfile2{
+    int state;
+    std::vector<std::string> filename;
+};
+struct frecvfile3{
+    int state;
+    std::string cid;
+    std::string id;
     std::string filename;
-    std::size_t filesize;
-    std::vector<char> content;
+};
+struct frecvfile4{
+    long long int filesize;
 };
 struct fadd1{
     int state;
@@ -301,18 +317,25 @@ struct gsendfile1{
     std::string cid;
     std::string gid;
     std::string filename;
-    std::size_t filesize;
-    std::vector<char> content;
+    long long int filesize;
 };
-struct gfilehistory1{
+struct grecvfile1{
     int state;
     std::string cid;
     std::string gid;
 };
-struct gfilehistory2{
+struct grecvfile2{
+    int state;
+    std::vector<std::string> filename;
+};
+struct grecvfile3{
+    int state;
+    std::string cid;
+    std::string gid;
     std::string filename;
-    std::size_t filesize;
-    std::vector<char> content;
+};
+struct grecvfile4{
+    long long int filesize;
 };
 struct gcreation1{
     int state;
@@ -396,7 +419,7 @@ struct unonline{//un
     std::vector<json> un;//"un" + cid
 };
 struct pgroup{//gg
-    std::string gid;//ggid gid+gid+gid
+    std::string gid;//ggid gid+gid
     std::string g_leader;
     std::vector<std::string> manager;
     std::vector<std::string> member;
@@ -407,11 +430,15 @@ struct historys{//hh
     std::string id2;
     std::vector<std::string> chathistory;
     //fire[];
+    std::vector<std::string> filename;
+    std::vector<std::string> filehistory;
 };
 struct ghistorys{//gh
     std::string gid;//ghid  gid+"g"
     std::vector<std::string> chatghistory;
     //fire[];
+    std::vector<std::string> gfilename;
+    std::vector<std::string> gfilehistory;
 };
 
 #endif 
