@@ -1,6 +1,6 @@
 #include "cli.hpp"
 
-void fchat(){
+void myclient::fchat(){
     fchat1 p;
     std::string id;
     int m = 0;
@@ -75,7 +75,7 @@ void fchat(){
     }
 }
 
-void fhistory(){
+void myclient::fhistory(){
     std::string json_str;
     std::string id;
     fhistory1 p;
@@ -114,7 +114,7 @@ void fhistory(){
     std::cout << std::endl;
 }
 
-void gchat(){
+void myclient::gchat(){
     gchat1 p;
     std::string gid;
     int m = 0;
@@ -185,7 +185,7 @@ void gchat(){
     }
 }
 
-void ghistory(){
+void myclient::ghistory(){
     std::string json_str;
     std::string gid;
     ghistory1 p;

@@ -1,6 +1,6 @@
 #include "cli.hpp"
 
-void flist(){
+void myclient::flist(){
     flist1 p1;
     std::vector<ffriend> t;
     std::string json_str;
@@ -31,7 +31,7 @@ void flist(){
     std::cout << std::endl;
 }
 
-void glist(){
+void myclient::glist(){
     glist1 p1;
     std::vector<fgroup> t;
     std::string json_str;
@@ -69,7 +69,7 @@ void glist(){
     std::cout << std::endl;
 }
 
-void fadd(){
+void myclient::fadd(){
     std::string id;
     std::string json_str;
     fadd1 p;
@@ -105,7 +105,7 @@ void fadd(){
     }
 }
 
-void fdel(){
+void myclient::fdel(){
     std::string id;
     std::string json_str;
     fdel1 p;
@@ -137,7 +137,7 @@ void fdel(){
     }
 }
 
-void fblock(){
+void myclient::fblock(){
     std::string id;
     std::string json_str;
     fblock1 p;
@@ -170,7 +170,7 @@ void fblock(){
     }
 }
 
-void funblock(){
+void myclient::funblock(){
     std::string json_str;
     funblock1 p;
     funblock2 t;
@@ -223,7 +223,7 @@ void funblock(){
     std::cout << std::endl;
 }
 
-void fsearch(){
+void myclient::fsearch(){
     std::string id;
     std::string json_str;
     fsearch1 p;
@@ -266,7 +266,7 @@ void fsearch(){
     }
 }
 
-void fapplication(){
+void myclient::fapplication(){
     std::string json_str;
     fapplication1 p;
     fapplication2 t;
@@ -323,7 +323,7 @@ void fapplication(){
     std::cout << std::endl;
 }
 
-void gcreation(){
+void myclient::gcreation(){
     std::string json_str;
     std::string gid;
     gcreation1 p;
@@ -352,7 +352,7 @@ void gcreation(){
     std::cout << std::endl;
 }
 
-void gdissolution(){
+void myclient::gdissolution(){
     std::string json_str;
     std::string gid;
     gdissolution1 p;
@@ -381,7 +381,7 @@ void gdissolution(){
     std::cout << std::endl;
 }
 
-void gapplication(){
+void myclient::gapplication(){
     std::string gid;
     std::string json_str;
     gapplication1 p;
@@ -411,7 +411,7 @@ void gapplication(){
         exit(1);
 }
 
-void gexit(){
+void myclient::gexit(){
     std::string gid;
     std::string json_str;
     gexit1 p;
@@ -441,7 +441,7 @@ void gexit(){
         exit(1);
 }
 
-void addmanager(){
+void myclient::addmanager(){
     std::string json_str;
     std::string gid;
     std::string id;
@@ -481,7 +481,7 @@ void addmanager(){
     std::cout << std::endl;
 }
 
-void delmanager(){
+void myclient::delmanager(){
     std::string json_str;
     std::string gid;
     std::string id;
@@ -519,7 +519,7 @@ void delmanager(){
     std::cout << std::endl;
 }
 
-void examine(){
+void myclient::examine(){
     std::string json_str;
     examine1 p;
     std::vector<examine2> t;
@@ -612,7 +612,7 @@ void examine(){
     std::cout << std::endl;
 }
 
-void delmember(){
+void myclient::delmember(){
     std::string json_str;
     std::string gid;
     std::string id;

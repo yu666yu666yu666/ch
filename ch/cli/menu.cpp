@@ -1,6 +1,6 @@
 #include "cli.hpp"
 
-void begin2(){
+void myclient::begin2(){
     std::string option;
     while(1){
         std::cout << "----------------------" << '\n';
@@ -29,7 +29,7 @@ void begin2(){
     }
 }
 
-void begin3(){
+void myclient::begin3(){
     std::string option;
     while(1){
         std::cout << '\n' << "----------------------" << '\n';
@@ -65,7 +65,7 @@ void begin3(){
     std::cout << std::endl;
 }
 
-void begin4(){
+void myclient::begin4(){
     std::string option;
     while(1){
         std::cout << '\n' << "----------------------" << '\n';
@@ -101,7 +101,7 @@ void begin4(){
     std::cout << std::endl;
 }
 
-void begin5(){
+void myclient::begin5(){
     std::string option;
     while(1){
         std::cout << '\n' << "----------------------" << '\n';
@@ -140,7 +140,7 @@ void begin5(){
     std::cout << std::endl;
 }
 
-void begin6(){
+void myclient::begin6(){
     std::string option;
     while(1){
         std::cout << '\n' << "----------------------" << '\n';
@@ -185,7 +185,7 @@ void begin6(){
     std::cout << std::endl;
 }
 
-void begin7(){
+void myclient::begin7(){
     std::string option;
     while(1){
         std::cout << '\n' << "----------------------" << '\n';
@@ -224,7 +224,7 @@ void begin7(){
     std::cout << std::endl;
 }
 
-void begin8(){
+void myclient::begin8(){
     std::string option;
     while(1){
         std::cout << '\n' << "----------------------" << '\n';

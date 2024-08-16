@@ -1,6 +1,6 @@
 #include "cli.hpp"
 
-std::string gettime(){
+std::string myclient::gettime(){
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
     std::time_t currenttime = std::chrono::system_clock::to_time_t(now);
     std::stringstream ss;
@@ -8,21 +8,21 @@ std::string gettime(){
     return ss.str();
 }
 
-void fa(std::string json_str){
+void myclient::fa(std::string json_str){
     if (send(client_socket, json_str.c_str(), json_str.length(),0) < 0) {
         std::cerr << "Failed to send to socket." << std::endl;
         exit(1);
     }
 }
 
-void fa1(std::string json_str){
+void myclient::fa1(std::string json_str){
     if (send(client_socket1, json_str.c_str(), json_str.length(),0) < 0) {
         std::cerr << "Failed to send to socket." << std::endl;
         exit(1);
     }
 }
 
-std::string shou() {
+std::string myclient::shou() {
     char buffer[BUFFER_SIZE];
     std::string json_str;
     ssize_t bytes_read;
@@ -41,7 +41,7 @@ std::string shou() {
     return json_str;
 }
 
-std::string shou1() {
+std::string myclient::shou1() {
     char buffer[BUFFER_SIZE];
     std::string json_str;
     ssize_t bytes_read;
@@ -60,7 +60,7 @@ std::string shou1() {
     return json_str; 
 }
 
-void b_thread_function(){
+void myclient::b_thread_function(){
     usleep(50000);
     std::string json_str;
     cshou p;
@@ -140,7 +140,7 @@ void b_thread_function(){
     }
 }
 
-void begin1(){
+void myclient::begin1(){
     std::string option;
     while(1){
         std::cout << '\n' << "----------------------" << '\n';

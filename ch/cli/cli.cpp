@@ -1,6 +1,6 @@
 #include "cli.hpp"
 
-std::string gettime(){
+std::string myclient::gettime(){
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
     std::time_t currenttime = std::chrono::system_clock::to_time_t(now);
     std::stringstream ss;
@@ -8,21 +8,21 @@ std::string gettime(){
     return ss.str();
 }
 
-void fa(std::string json_str){
+void myclient::fa(std::string json_str){
     if (send(client_socket, json_str.c_str(), json_str.length(),0) < 0) {
         std::cerr << "Failed to send to socket." << std::endl;
         exit(1);
     }
 }
 
-void fa1(std::string json_str){
+void myclient::fa1(std::string json_str){
     if (send(client_socket1, json_str.c_str(), json_str.length(),0) < 0) {
         std::cerr << "Failed to send to socket." << std::endl;
         exit(1);
     }
 }
 
-std::string shou() {
+std::string myclient::shou() {
     char buffer[BUFFER_SIZE];
     std::string json_str;
     ssize_t bytes_read;
@@ -41,7 +41,7 @@ std::string shou() {
     return json_str;
 }
 
-std::string shou1() {
+std::string myclient::shou1() {
     char buffer[BUFFER_SIZE];
     std::string json_str;
     ssize_t bytes_read;
@@ -60,7 +60,7 @@ std::string shou1() {
     return json_str; 
 }
 
-void b_thread_function(){
+void myclient::b_thread_function(){
     usleep(50000);
     std::string json_str;
     cshou p;
@@ -140,7 +140,7 @@ void b_thread_function(){
     }
 }
 
-void begin1(){
+void myclient::begin1(){
     std::string option;
     while(1){
         std::cout << '\n' << "----------------------" << '\n';
@@ -350,7 +350,7 @@ void begin1(){
     }
 }
 
-void begin2(){
+void myclient::begin2(){
     std::string option;
     while(1){
         std::cout << "----------------------" << '\n';
@@ -379,7 +379,7 @@ void begin2(){
     }
 }
 
-void begin3(){
+void myclient::begin3(){
     std::string option;
     while(1){
         std::cout << '\n' << "----------------------" << '\n';
@@ -415,7 +415,7 @@ void begin3(){
     std::cout << std::endl;
 }
 
-void begin4(){
+void myclient::begin4(){
     std::string option;
     while(1){
         std::cout << '\n' << "----------------------" << '\n';
@@ -451,7 +451,7 @@ void begin4(){
     std::cout << std::endl;
 }
 
-void begin5(){
+void myclient::begin5(){
     std::string option;
     while(1){
         std::cout << '\n' << "----------------------" << '\n';
@@ -490,7 +490,7 @@ void begin5(){
     std::cout << std::endl;
 }
 
-void begin6(){
+void myclient::begin6(){
     std::string option;
     while(1){
         std::cout << '\n' << "----------------------" << '\n';
@@ -535,7 +535,7 @@ void begin6(){
     std::cout << std::endl;
 }
 
-void begin7(){
+void myclient::begin7(){
     std::string option;
     while(1){
         std::cout << '\n' << "----------------------" << '\n';
@@ -574,7 +574,7 @@ void begin7(){
     std::cout << std::endl;
 }
 
-void begin8(){
+void myclient::begin8(){
     std::string option;
     while(1){
         std::cout << '\n' << "----------------------" << '\n';
@@ -625,7 +625,7 @@ void begin8(){
     std::cout << std::endl;
 }
 
-void flist(){
+void myclient::flist(){
     flist1 p1;
     std::vector<ffriend> t;
     std::string json_str;
@@ -656,7 +656,7 @@ void flist(){
     std::cout << std::endl;
 }
 
-void glist(){
+void myclient::glist(){
     glist1 p1;
     std::vector<fgroup> t;
     std::string json_str;
@@ -694,7 +694,7 @@ void glist(){
     std::cout << std::endl;
 }
 
-void fchat(){
+void myclient::fchat(){
     fchat1 p;
     std::string id;
     int m = 0;
@@ -769,7 +769,7 @@ void fchat(){
     }
 }
 
-void fsendfile(){
+void myclient::fsendfile(){
     fsendfile1 p;
     std::string id;
     int m = 0;
@@ -854,7 +854,7 @@ void fsendfile(){
     std::cout <<std::endl;
 }
 
-void frecvfile(){
+void myclient::frecvfile(){
     std::string json_str;
     std::string id;
     frecvfile1 p;
@@ -949,7 +949,7 @@ void frecvfile(){
             exit(1);
 }
 
-void fhistory(){
+void myclient::fhistory(){
     std::string json_str;
     std::string id;
     fhistory1 p;
@@ -988,7 +988,7 @@ void fhistory(){
     std::cout << std::endl;
 }
 
-void fadd(){
+void myclient::fadd(){
     std::string id;
     std::string json_str;
     fadd1 p;
@@ -1024,7 +1024,7 @@ void fadd(){
     }
 }
 
-void fdel(){
+void myclient::fdel(){
     std::string id;
     std::string json_str;
     fdel1 p;
@@ -1056,7 +1056,7 @@ void fdel(){
     }
 }
 
-void fblock(){
+void myclient::fblock(){
     std::string id;
     std::string json_str;
     fblock1 p;
@@ -1089,7 +1089,7 @@ void fblock(){
     }
 }
 
-void funblock(){
+void myclient::funblock(){
     std::string json_str;
     funblock1 p;
     funblock2 t;
@@ -1142,7 +1142,7 @@ void funblock(){
     std::cout << std::endl;
 }
 
-void fsearch(){
+void myclient::fsearch(){
     std::string id;
     std::string json_str;
     fsearch1 p;
@@ -1185,7 +1185,7 @@ void fsearch(){
     }
 }
 
-void fapplication(){
+void myclient::fapplication(){
     std::string json_str;
     fapplication1 p;
     fapplication2 t;
@@ -1242,7 +1242,7 @@ void fapplication(){
     std::cout << std::endl;
 }
 
-void gchat(){
+void myclient::gchat(){
     gchat1 p;
     std::string gid;
     int m = 0;
@@ -1313,7 +1313,7 @@ void gchat(){
     }
 }
 
-void gsendfile(){
+void myclient::gsendfile(){
     gsendfile1 p;
     std::string gid;
     int m = 0;
@@ -1398,7 +1398,7 @@ void gsendfile(){
     std::cout <<std::endl;
 }
 
-void grecvfile(){
+void myclient::grecvfile(){
     std::string json_str;
     std::string gid;
     grecvfile1 p;
@@ -1489,7 +1489,7 @@ void grecvfile(){
             exit(1);
 }
 
-void ghistory(){
+void myclient::ghistory(){
     std::string json_str;
     std::string gid;
     ghistory1 p;
@@ -1524,7 +1524,7 @@ void ghistory(){
     std::cout << std::endl;
 }
 
-void gcreation(){
+void myclient::gcreation(){
     std::string json_str;
     std::string gid;
     gcreation1 p;
@@ -1553,7 +1553,7 @@ void gcreation(){
     std::cout << std::endl;
 }
 
-void gdissolution(){
+void myclient::gdissolution(){
     std::string json_str;
     std::string gid;
     gdissolution1 p;
@@ -1582,7 +1582,7 @@ void gdissolution(){
     std::cout << std::endl;
 }
 
-void gapplication(){
+void myclient::gapplication(){
     std::string gid;
     std::string json_str;
     gapplication1 p;
@@ -1612,7 +1612,7 @@ void gapplication(){
         exit(1);
 }
 
-void gexit(){
+void myclient::gexit(){
     std::string gid;
     std::string json_str;
     gexit1 p;
@@ -1642,7 +1642,7 @@ void gexit(){
         exit(1);
 }
 
-void addmanager(){
+void myclient::addmanager(){
     std::string json_str;
     std::string gid;
     std::string id;
@@ -1682,7 +1682,7 @@ void addmanager(){
     std::cout << std::endl;
 }
 
-void delmanager(){
+void myclient::delmanager(){
     std::string json_str;
     std::string gid;
     std::string id;
@@ -1720,7 +1720,7 @@ void delmanager(){
     std::cout << std::endl;
 }
 
-void examine(){
+void myclient::examine(){
     std::string json_str;
     examine1 p;
     std::vector<examine2> t;
@@ -1813,7 +1813,7 @@ void examine(){
     std::cout << std::endl;
 }
 
-void delmember(){
+void myclient::delmember(){
     std::string json_str;
     std::string gid;
     std::string id;

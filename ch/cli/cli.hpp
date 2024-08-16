@@ -109,6 +109,57 @@ enum {
     STATE_EXIT2
 };
 
+class myclient{
+
+public :
+
+    myclient(const char* ip);
+    ~myclient();
+    void run();
+    
+private :
+
+    struct sockaddr_in server_addr;
+    std::string gettime();
+    void fa(std::string);
+    void fa1(std::string);
+    std::string shou();
+    std::string shou1();
+    void b_thread_function();
+    void begin1();
+    void begin2();
+    void begin3();
+    void begin4();
+    void flist();
+    void begin5();
+    void begin6();
+    void glist();
+    void begin7();
+    void begin8();
+    void fchat();
+    void fsendfile();
+    void frecvfile();
+    void fhistory();
+    void fadd();
+    void fdel();
+    void fblock();
+    void funblock();
+    void fsearch();
+    void fapplication();
+    void gchat();
+    void gsendfile();
+    void grecvfile();
+    void ghistory();
+    void gcreation();
+    void gdissolution();
+    void gapplication();
+    void gexit();
+    void addmanager();
+    void delmanager();
+    void examine();
+    void delmember();
+};
+
 class flist11{
 public:
     void filst11();
@@ -116,47 +167,6 @@ private:
     int state;
     std::string cid;
 };
-
-std::string gettime();
-void fa(std::string);
-void fa1(std::string);
-std::string shou();
-std::string shou1();
-//void mywait();
-void b_thread_function();
-void begin1();
-void begin2();
-void begin3();
-void begin4();
-void flist();
-void begin5();
-void begin6();
-void glist();
-void begin7();
-void begin8();
-void fchat();
-void fsendfile();
-void frecvfile();
-void fhistory();
-void fadd();
-void fdel();
-void fblock();
-void funblock();
-void fsearch();
-void fapplication();
-void gchat();
-void gsendfile();
-void grecvfile();
-void ghistory();
-void gcreation();
-void gdissolution();
-void gapplication();
-void gexit();
-void addmanager();
-void delmanager();
-void examine();
-void delmember();
-
 struct pregister1{
     int state;
     std::string cid;

@@ -1,6 +1,6 @@
 #include "cli.hpp"
 
-void fsendfile(){
+void myclient::fsendfile(){
     fsendfile1 p;
     std::string id;
     int m = 0;
@@ -85,7 +85,7 @@ void fsendfile(){
     std::cout <<std::endl;
 }
 
-void frecvfile(){
+void myclient::frecvfile(){
     std::string json_str;
     std::string id;
     frecvfile1 p;
@@ -178,7 +178,7 @@ void frecvfile(){
             exit(1);
 }
 
-void gsendfile(){
+void myclient::gsendfile(){
     gsendfile1 p;
     std::string gid;
     int m = 0;
@@ -263,7 +263,7 @@ void gsendfile(){
     std::cout <<std::endl;
 }
 
-void grecvfile(){
+void myclient::grecvfile(){
     std::string json_str;
     std::string gid;
     grecvfile1 p;
