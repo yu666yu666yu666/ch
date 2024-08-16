@@ -1,5 +1,10 @@
 #include "cli.hpp"
-#include "cli.cpp"
+#include "start.cpp"
+#include "menu.cpp"
+#include "manage.cpp"
+#include "file.cpp"
+#include "chat.cpp"
+//#include "cli.cpp"
 
 int main(int argc,char* argv[]) {
     
