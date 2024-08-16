@@ -47,6 +47,10 @@ void myclient::run(){
 }
 
 int main(int argc,char *argv[]) {
+    if(argc != 2){
+        std::cout << "正确输入参数!" <<std::endl;
+        return 0;
+    }
     struct sigaction sa;
     std::memset(&sa,0,sizeof(sa));
     sa.sa_handler = SIG_IGN;
