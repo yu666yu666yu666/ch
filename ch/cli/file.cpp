@@ -1,6 +1,5 @@
 #include "cli.hpp"
 
-
 void fsendfile(){
     fsendfile1 p;
     std::string id;
@@ -67,17 +66,17 @@ void fsendfile(){
             json_str = j.dump();
             fa(json_str);
             sleep(3);
-            off_t offset = 0;
-            ssize_t bytes_sent = 0;
-            while (offset < file_stat.st_size){
-                bytes_sent = sendfile(client_socket, file, &offset, file_stat.st_size - offset);
-                if (bytes_sent < 0){
+            off_t off = 0;
+            ssize_t bytes = 0;
+            while (off < file_stat.st_size){
+                bytes = sendfile(client_socket, file, &off, file_stat.st_size - off);
+                if (bytes < 0){
                     std::cerr <<"sendfile err" << '\n';
                     break;
                 }
-                 std::cout << p.filename << ": " << (int)(((float)offset / file_stat.st_size) * 100) << "%" << std::flush;
+                 std::cout << p.filename << ": " << (int)(((float)off / file_stat.st_size) * 100) << "%" << std::flush;
             }
-            std::cout  << '\n'<<file_stat.st_size << '|'<< offset;
+            std::cout  << '\n'<<file_stat.st_size << '|'<< off;
             std::cout << std::endl;
             close(file);    
         }
@@ -141,36 +140,34 @@ void frecvfile(){
                     std::filesystem::create_directories(dirpath);
                     std::cout << "正在创建文件" << std::endl;
                 }
-                else
-                    std::cout << "Directory exists" << std::endl;
-                    
+                
                 filename1 = dirpath.c_str() + filename;
                 FILE *fp = fopen(filename1.c_str(), "wb");
                 if (fp == nullptr) 
-                    std::cerr << "Failed to open file for writing" << std::endl;  
+                    std::cerr << "Failed to open file" << std::endl;  
  
                 int len;
                 char buffer[10240];
-                off_t total_received = 0;
+                off_t off = 0;
                 sleep(5);
-                while (total_received < tt.filesize){
-                    len = recv(client_socket, buffer, (total_received + 10240 > tt.filesize) ? tt.filesize - total_received : 10240, 0);
+                while (off < tt.filesize){
+                    len = recv(client_socket, buffer, (off + 10240 > tt.filesize) ? tt.filesize - off : 10240, 0);
                     if (len <= 0){
                         if (len < 0)
                             perror("recv");
                     }
                     fwrite(buffer, 1, len, fp);
-                    total_received += len;   
-                    std::cout  << filename << ": " << (int)(((float)total_received / tt.filesize) * 100) << "%" << std::flush;              
+                    off += len;   
+                    std::cout  << filename << ": " << (int)(((float)off / tt.filesize) * 100) << "%" << std::flush;              
                 }
                 std::cout << std::endl;
                 fclose(fp);
-                std::cout << total_received << std::endl;
-                if (total_received == tt.filesize){
+                std::cout << off << std::endl;
+                if (off == tt.filesize){
                     std::cout << "接收成功" << std::endl;
                 }
                 else
-                    std::cerr << "File size mismatch" << std::endl;
+                    std::cerr << "不全" << std::endl;
             }
         }
         else if(t.state == STATE_NOFRIEND)
@@ -248,15 +245,15 @@ void gsendfile(){
             json_str = j.dump();
             fa(json_str);
             sleep(3);
-            off_t offset = 0;
-            ssize_t bytes_sent = 0;
-            while (offset < file_stat.st_size){
-                bytes_sent = sendfile(client_socket, file, &offset, file_stat.st_size - offset);
-                if (bytes_sent < 0){
+            off_t off = 0;
+            ssize_t bytes = 0;
+            while (off < file_stat.st_size){
+                bytes = sendfile(client_socket, file, &off, file_stat.st_size - off);
+                if (bytes < 0){
                     std::cerr <<"sendfile err" << '\n';
                     break;
                 }
-                 std::cout << p.filename << ": " << (int)(((float)offset / file_stat.st_size) * 100) << "%" << std::flush;
+                 std::cout << p.filename << ": " << (int)(((float)off / file_stat.st_size) * 100) << "%" << std::flush;
             }
             std::cout << std::endl;
             close(file);    
@@ -320,30 +317,30 @@ void grecvfile(){
                 filename1 = dirpath.c_str() + filename;
                 FILE *fp = fopen(filename1.c_str(), "wb");
                 if (fp == nullptr) 
-                    std::cerr << "Failed to open file for writing" << std::endl;  
+                    std::cerr << "Failed to open file" << std::endl;  
  
                 int len;
                 char buffer[10240];
-                off_t total_received = 0;
+                off_t off = 0;
                 sleep(5);
-                while (total_received < tt.filesize){
-                    len = recv(client_socket, buffer, (total_received + 10240 > tt.filesize) ? tt.filesize - total_received : 10240, 0);
+                while (off < tt.filesize){
+                    len = recv(client_socket, buffer, (off + 10240 > tt.filesize) ? tt.filesize - off : 10240, 0);
                     if (len <= 0){
                         if (len < 0)
                             perror("recv");
                     }
                     fwrite(buffer, 1, len, fp);
-                    total_received += len;   
-                    std::cout << "\33[2K\r" << filename << ": " << (int)(((float)total_received / tt.filesize) * 100) << "%" << std::flush;              
+                    off += len;   
+                    std::cout  << filename << ": " << (int)(((float)off / tt.filesize) * 100) << "%" << std::flush;              
                 }
                 std::cout << std::endl;
                 fclose(fp);
-                std::cout << total_received << std::endl;
-                if (total_received == tt.filesize){
+                std::cout << off << std::endl;
+                if (off == tt.filesize){
                     std::cout << "接收成功" << std::endl;
                 }
                 else
-                    std::cerr << "File size mismatch" << std::endl;
+                    std::cerr << "不全" << std::endl;
             }
         }
         else if(t.state == STATE_NOGROUP)

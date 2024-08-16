@@ -41,8 +41,7 @@ using json = nlohmann::json;
 
 redisContext* rediss;
 int epoll_fd;
-std::mutex mtx;
-//mtx.lock();mtx.unlock();
+//std::mutex mtx;
 
 enum {
     STATE_NONE = 10,
@@ -153,13 +152,7 @@ void examine3s(std::string);
 void delmember1s(std::string,int);
 void exit1s(std::string,int);
 void exit2s(std::string,int);
-/*
-struct tfile{
-    std::string filename;
-    std::size_t filesize;
-    std::vector<char> content;
-};
-*/
+
 struct pregister1{
     int state;
     std::string cid;
@@ -434,14 +427,12 @@ struct historys{//hh
     std::string id1;//key1 id1+id2||key2 id2+id1
     std::string id2;
     std::vector<std::string> chathistory;
-    //fire[];
     std::vector<std::string> filename;
     std::vector<std::string> filehistory;
 };
 struct ghistorys{//gh
     std::string gid;//ghid  gid+"g"
     std::vector<std::string> chatghistory;
-    //fire[];
     std::vector<std::string> gfilename;
     std::vector<std::string> gfilehistory;
 };

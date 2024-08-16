@@ -3,73 +3,8 @@
 #include "manage.cpp"
 #include "file.cpp"
 #include "chat.cpp"
+#include "threadpool.cpp"
 //#include "ser.cpp"
-
-class ThreadPool {
-public:
-    explicit ThreadPool(std::size_t num_threads);
-    ~ThreadPool();
-    template<class F>
-    void add_task(F&& f);
-
-private:
-    void worker_thread();
-    std::vector<std::thread> threads; 
-    std::queue<std::function<void()>> tasks; 
-    std::mutex queue_mutex; 
-    std::condition_variable condition; 
-    bool stop;
-};
-
-template<class F>
-void ThreadPool::add_task(F&& f) {
-    {
-        std::unique_lock<std::mutex> lock(queue_mutex);
-        if (stop) {
-            throw std::runtime_error("enqueue on stopped ThreadPool");
-        }
-        tasks.emplace(std::forward<F>(f));
-    }
-    condition.notify_one();
-}
-
-ThreadPool::ThreadPool(std::size_t num_threads) : stop(false) {
-    for (std::size_t i = 0; i < num_threads; ++i) {
-        threads.emplace_back([this] {
-            worker_thread();
-        });
-    }
-}
-
-ThreadPool::~ThreadPool() {
-    {
-        std::unique_lock<std::mutex> lock(queue_mutex);
-        stop = true;
-    }
-
-    condition.notify_all();
-    for (std::thread &worker : threads) {
-        worker.join();
-    }
-}
-
-void ThreadPool::worker_thread() {
-    while (true) {
-        std::function<void()> task;
-        {
-            std::unique_lock<std::mutex> lock(queue_mutex);
-            condition.wait(lock, [this] {
-                return stop || !tasks.empty();
-            });
-            if (stop && tasks.empty()) {
-                return;
-            }
-            task = std::move(tasks.front());
-            tasks.pop();
-        }
-        task(); 
-    }
-}
 
 int main(){
     
@@ -171,7 +106,7 @@ int main(){
                 else
                     std::cout << "del ok"<< std::endl;
                 int fd = events[i].data.fd;
-                pool.add_task([fd = events[i].data.fd] {
+                pool.add([fd = events[i].data.fd] {
                     th1(fd);
                 });
                 //std::thread t(th1,fd);

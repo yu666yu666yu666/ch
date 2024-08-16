@@ -19,10 +19,8 @@ void fsendfile1s(std::string json_str,int client){
     std::filesystem::path dirpath = "/home/yu666/test/dir1/";
     if (!std::filesystem::exists(dirpath)){
         std::filesystem::create_directories(dirpath);
-        std::cout << "Directory created successfully" << std::endl;
+        std::cout << "正在创建文件" << std::endl;
     }
-    else
-        std::cout << "Directory already exists" << std::endl;
     filename = dirpath.c_str() + p.filename;
     FILE *fp = fopen(filename.c_str(), "wb");
     if (fp == nullptr){
@@ -32,9 +30,9 @@ void fsendfile1s(std::string json_str,int client){
     sleep(5);
     int len;
     char buffer[10240];
-    off_t total_received = 0;
+    off_t off = 0;
    
-    while (total_received < p.filesize){
+    while (off < p.filesize){
         len = recv(client, buffer, sizeof(buffer), 0);
         if (len <= 0){
             if(len < 0)
@@ -43,19 +41,14 @@ void fsendfile1s(std::string json_str,int client){
         }
 
         fwrite(buffer, 1, len, fp);
-        total_received += len;
-        std::cout << "    " << (int)(((float)total_received / p.filesize) * 100) << "%" << std::flush;
+        off += len;
+        std::cout << "    " << (int)(((float)off / p.filesize) * 100) << "%" << std::flush;
     }
-    std::cout << '\n'<<p.filesize << '|'<<total_received;
+    std::cout << '\n'<<p.filesize << '|'<< off;
     std::cout << std::endl;
     fclose(fp);
-    if (total_received == p.filesize){
-        std::cout << "File received successfully" << std::endl;
-        /*t.state = STATE_YES;
-        j = {{"1", t.state}};
-        jsonstr = j.dump();
-        fa(jsonstr,client);*/
-
+    if (off == p.filesize){
+        std::cout << "接收成功" << std::endl;
     std::string key1 = p.cid + p.id;
     std::string key2 = p.id + p.cid;
     redisReply* reply = (redisReply*)redisCommand(rediss, "EXISTS %s", key1.c_str());
@@ -152,11 +145,7 @@ void fsendfile1s(std::string json_str,int client){
     }
     }
     else{
-        std::cerr << "File size mismatch" << std::endl;
-       /*t.state = STATE_NO;
-        j = {{"1", t.state}};
-        jsonstr = j.dump();
-        fa(jsonstr,client);*/ 
+        std::cerr << "不全" << std::endl;
     }
 }
 
@@ -268,16 +257,16 @@ void frecvfile3s(std::string json_str,int client){
                 jsonstr = j.dump();
                 fa(jsonstr,client);
                 sleep(5);
-                off_t offset = 0;
-                ssize_t bytes_sent = 0;
-                while (offset < file_stat.st_size){
-                    bytes_sent = sendfile(client, file, &offset, file_stat.st_size - offset);
-                    if (bytes_sent < 0){
+                off_t off = 0;
+                ssize_t bytes = 0;
+                while (off < file_stat.st_size){
+                    bytes = sendfile(client, file, &off, file_stat.st_size - off);
+                    if (bytes < 0){
                         std::cerr << "Sendfile error: " << strerror(errno) << "\n";
                         break;
                     }
-                    std::cout << "Sent " << bytes_sent << " bytes, total sent: " << offset << " bytes\n";
-                    std::cout << "\33[2K\r" << p.filename << ": " << (int)(((float)offset / file_stat.st_size) * 100) << "%" << std::flush;
+                    std::cout << "发送: " << bytes << " bytes, 总共: " << off << " bytes\n";
+                    std::cout << p.filename << ": " << (int)(((float)off / file_stat.st_size) * 100) << "%" << std::flush;
                 }
                 std::cout << std::endl;
                 close(file);
@@ -306,16 +295,16 @@ void frecvfile3s(std::string json_str,int client){
                 jsonstr = j.dump();
                 fa(jsonstr,client);
                 sleep(5);
-                off_t offset = 0;
-                ssize_t bytes_sent = 0;
-                while (offset < file_stat.st_size){
-                    bytes_sent = sendfile(client, file, &offset, file_stat.st_size - offset);
-                    if (bytes_sent < 0){
+                off_t off = 0;
+                ssize_t bytes = 0;
+                while (off < file_stat.st_size){
+                    bytes = sendfile(client, file, &off, file_stat.st_size - off);
+                    if (bytes < 0){
                         std::cerr << "Sendfile error: " << strerror(errno) << "\n";
                         break;
                     }
-                    std::cout << "Sent " << bytes_sent << " bytes, total sent: " << offset << " bytes\n";
-                    std::cout << "\33[2K\r" << p.filename << ": " << (int)(((float)offset / file_stat.st_size) * 100) << "%" << std::flush;
+                    std::cout << "发送: " << bytes << " bytes, 总共: " << off << " bytes\n";
+                    std::cout  << p.filename << ": " << (int)(((float)off / file_stat.st_size) * 100) << "%" << std::flush;
                 }
                 std::cout << std::endl;
                 close(file);
@@ -346,10 +335,8 @@ void gsendfile1s(std::string json_str,int client){
     std::filesystem::path dirpath = "/home/yu666/test/dir1/";
     if (!std::filesystem::exists(dirpath)){
         std::filesystem::create_directories(dirpath);
-        std::cout << "Directory created successfully" << std::endl;
+        std::cout << "正在创建文件" << std::endl;
     }
-    else
-        std::cout << "Directory already exists" << std::endl;
     filename = dirpath.c_str() + p.filename;
     FILE *fp = fopen(filename.c_str(), "wb");
     if (fp == nullptr){
@@ -359,9 +346,9 @@ void gsendfile1s(std::string json_str,int client){
     sleep(5);
     int len;
     char buffer[10240];
-    off_t total_received = 0;
+    off_t off = 0;
 
-    while (total_received < p.filesize){
+    while (off < p.filesize){
         len = recv(client, buffer, sizeof(buffer), 0);
         if (len < 0){
             perror("recv");
@@ -369,17 +356,13 @@ void gsendfile1s(std::string json_str,int client){
         }
 
         fwrite(buffer, 1, len, fp);
-        total_received += len;
-        std::cout <<"   " << (int)(((float)total_received / p.filesize) * 100) << "%" << std::flush;
+        off += len;
+        std::cout <<"   " << (int)(((float)off / p.filesize) * 100) << "%" << std::flush;
     }
     std::cout << std::endl;
     fclose(fp);
-    if (total_received == p.filesize){
-        std::cout << "File received successfully" << std::endl;
-       /* t.state = STATE_YES;
-        j = {{"1", t.state}};
-        jsonstr = j.dump();
-        fa(jsonstr,client);*/
+    if (off == p.filesize){
+        std::cout << "接收成功" << std::endl;
     
     std::string ghid = p.gid + "g";
     redisReply* reply = (redisReply*)redisCommand(rediss, "EXISTS %s", ghid.c_str());
@@ -463,7 +446,6 @@ void gsendfile1s(std::string json_str,int client){
             reply = (redisReply*)redisCommand(rediss, "SET %s %s", unid.c_str(), jsonstr.c_str());
         }
     }
-                
                 freeReplyObject(reply);
                 return;
             }
@@ -475,11 +457,7 @@ void gsendfile1s(std::string json_str,int client){
     }
     }
     else{
-        std::cerr << "File size mismatch" << std::endl;
-       /* t.state = STATE_NO;
-        j = {{"1", t.state}};
-        jsonstr = j.dump();
-        fa(jsonstr,client);*/
+        std::cerr << "不全" << std::endl;
     }
 }
 
@@ -578,16 +556,16 @@ void grecvfile3s(std::string json_str,int client){
                 jsonstr = j.dump();
                 fa(jsonstr,client);
                 sleep(5);
-                off_t offset = 0;
-                ssize_t bytes_sent = 0;
-                while (offset < file_stat.st_size){
-                    bytes_sent = sendfile(client, file, &offset, file_stat.st_size - offset);
-                    if (bytes_sent < 0){
+                off_t off = 0;
+                ssize_t bytes = 0;
+                while (off < file_stat.st_size){
+                    bytes = sendfile(client, file, &off, file_stat.st_size - off);
+                    if (bytes < 0){
                         std::cerr << "Sendfile error: " << strerror(errno) << "\n";
                         break;
                     }
-                    std::cout << "Sent " << bytes_sent << " bytes, total sent: " << offset << " bytes\n";
-                    std::cout << "\33[2K\r" << p.filename << ": " << (int)(((float)offset / file_stat.st_size) * 100) << "%" << std::flush;
+                    std::cout << "发送: " << bytes << " bytes, 总共: " << off << " bytes\n";
+                    std::cout  << p.filename << ": " << (int)(((float)off / file_stat.st_size) * 100) << "%" << std::flush;
                 }
                 std::cout << std::endl;
                 close(file);
