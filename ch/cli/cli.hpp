@@ -109,6 +109,14 @@ enum {
     STATE_EXIT2
 };
 
+class flist11{
+public:
+    void filst11();
+private:
+    int state;
+    std::string cid;
+};
+
 std::string gettime();
 void fa(std::string);
 void fa1(std::string);
@@ -148,6 +156,7 @@ void addmanager();
 void delmanager();
 void examine();
 void delmember();
+
 struct pregister1{
     int state;
     std::string cid;
