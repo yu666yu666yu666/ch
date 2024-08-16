@@ -1,5 +1,9 @@
 #include "ser.hpp"
-#include "ser.cpp"
+#include "start.cpp"
+#include "manage.cpp"
+#include "file.cpp"
+#include "chat.cpp"
+//#include "ser.cpp"
 
 class ThreadPool {
 public:

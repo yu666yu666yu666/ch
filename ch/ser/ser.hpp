@@ -113,6 +113,7 @@ enum {
 };
 
 void th1(int);
+void fa(std::string,int);
 void run(std::string,int);
 void tooclient1s(std::string,int);
 void fhistory1s(std::string,int);
