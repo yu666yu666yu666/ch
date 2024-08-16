@@ -1,24 +1,71 @@
 #include "ser.hpp"
 #include "ser.cpp"
 
-/*
-void th(){
-    struct epoll_event events;
-    int m = epoll_wait(epoll_fd, &events, 1, -1);
-    char buffer[BUFFER_SIZE];
-    std::string json_str;
-    ssize_t bytes_read;
+class ThreadPool {
+public:
+    explicit ThreadPool(std::size_t num_threads);
+    ~ThreadPool();
+    template<class F>
+    void add_task(F&& f);
 
-    while(1){
-        bytes_read = recv(events.data.fd,buffer,sizeof(buffer),0);
-        if(bytes_read <= 0)
-            break;
-        json_str += std::string(buffer,bytes_read);
+private:
+    void worker_thread();
+    std::vector<std::thread> threads; 
+    std::queue<std::function<void()>> tasks; 
+    std::mutex queue_mutex; 
+    std::condition_variable condition; 
+    bool stop;
+};
+
+template<class F>
+void ThreadPool::add_task(F&& f) {
+    {
+        std::unique_lock<std::mutex> lock(queue_mutex);
+        if (stop) {
+            throw std::runtime_error("enqueue on stopped ThreadPool");
+        }
+        tasks.emplace(std::forward<F>(f));
+    }
+    condition.notify_one();
+}
+
+ThreadPool::ThreadPool(std::size_t num_threads) : stop(false) {
+    for (std::size_t i = 0; i < num_threads; ++i) {
+        threads.emplace_back([this] {
+            worker_thread();
+        });
+    }
+}
+
+ThreadPool::~ThreadPool() {
+    {
+        std::unique_lock<std::mutex> lock(queue_mutex);
+        stop = true;
     }
 
-    run(json_str,events.data.fd);
+    condition.notify_all();
+    for (std::thread &worker : threads) {
+        worker.join();
+    }
 }
-*/
+
+void ThreadPool::worker_thread() {
+    while (true) {
+        std::function<void()> task;
+        {
+            std::unique_lock<std::mutex> lock(queue_mutex);
+            condition.wait(lock, [this] {
+                return stop || !tasks.empty();
+            });
+            if (stop && tasks.empty()) {
+                return;
+            }
+            task = std::move(tasks.front());
+            tasks.pop();
+        }
+        task(); 
+    }
+}
 
 int main(){
     
@@ -82,6 +129,7 @@ int main(){
             return 1;
     }
     int mm = 0;
+    ThreadPool pool(20);
     while (1) {
         struct epoll_event events[MAX_EVENTS];
         std::cout <<"wait"<<std::endl;
@@ -112,36 +160,19 @@ int main(){
                 struct epoll_event event;
                 event.data.fd = events[i].data.fd;
 
-                if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, event.data.fd, 0) < 0)
-                {
-                    //perror("Epoll_ctl-DEL failed");
+                if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, event.data.fd, 0) < 0){
                     perror("epoll_ctl");
                     exit(EXIT_FAILURE);
                 }
                 else
                     std::cout << "del ok"<< std::endl;
                 int fd = events[i].data.fd;
-                std::thread t(th1,fd);
-                t.detach();
+                pool.add_task([fd = events[i].data.fd] {
+                    th1(fd);
+                });
+                //std::thread t(th1,fd);
+                //t.detach();
             }
         }
     }
-
-/*
-    std::thread threads[3];
-    for(int i = 0;i < 3;i++){
-        threads[i] = std::thread(th);
-    }
-
-    while(1){
-        client_socket = accept(server_socket,(struct sockaddr*)&client_addr, &client_len);
-        event.events = EPOLLIN;
-        event.data.fd = client_socket;
-        if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_socket, &event) == -1) {
-            std::cerr << "Failed to add socket to epoll instance." << std::endl;
-            return 1;
-        }
-    }
-*/    
-
 }

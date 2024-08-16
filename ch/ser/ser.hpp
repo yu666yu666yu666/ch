@@ -26,6 +26,10 @@
 #include <hiredis/hiredis.h>
 #include <csignal>
 #include <cstring>
+#include <queue>
+#include <functional>
+#include <condition_variable>
+#include <stdexcept>
 //#include "nlohmann/json.hpp"
 #include "/home/yu666/Desktop/ch/json/single_include/nlohmann/json.hpp"
 using json = nlohmann::json;
@@ -33,7 +37,7 @@ using json = nlohmann::json;
 #define SERVER_PORT 8888
 #define MAX_EVENTS 1024
 #define BUFFER_SIZE 1024
-#define IP "127.0.0.1"
+#define IP "10.30.0.118"
 
 redisContext* rediss;
 int epoll_fd;

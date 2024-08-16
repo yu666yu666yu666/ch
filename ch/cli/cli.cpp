@@ -21,31 +21,7 @@ void fa1(std::string json_str){
         exit(1);
     }
 }
-/*
-std::string shou(){
-    char buffer[BUFFER_SIZE];
-    std::string json_str;
-    ssize_t bytes_read = recv(client_socket, buffer, BUFFER_SIZE,0);
-    if (bytes_read == -1) {
-        std::cerr << "Failed to read from socket." << std::endl;
-        exit(1);
-    }
-    json_str+=buffer;
-    return json_str;
-}
 
-std::string shou1(){
-    char buffer[BUFFER_SIZE];
-    std::string json_str;
-    ssize_t bytes_read = read(client_socket1, buffer, BUFFER_SIZE);
-    if (bytes_read == -1) {
-        std::cerr << "Failed to read from socket." << std::endl;
-        exit(1);
-    }
-    json_str+=buffer;
-    return json_str;
-}
-*/
 std::string shou() {
     char buffer[BUFFER_SIZE];
     std::string json_str;
@@ -63,16 +39,6 @@ std::string shou() {
             break;
     }
     return json_str;
-/*
-    do {
-        bytes_read = read(client_socket, buffer, BUFFER_SIZE);
-        if (bytes_read == -1) {
-            std::cerr << "Failed to read from socket." << std::endl;
-            exit(1);
-        }
-        json_str += buffer;
-    } while (bytes_read == BUFFER_SIZE);
-*/    
 }
 
 std::string shou1() {
@@ -91,17 +57,7 @@ std::string shou1() {
         if(bytes_read < sizeof(buffer))
             break;
     }
-    return json_str;
-/*
-    do {
-        bytes_read = read(client_socket1, buffer, BUFFER_SIZE);
-        if (bytes_read == -1) {
-            std::cerr << "Failed to read from socket." << std::endl;
-            exit(1);
-        }
-        json_str += buffer;
-    } while (bytes_read == BUFFER_SIZE);
-*/    
+    return json_str; 
 }
 
 void b_thread_function(){
@@ -851,7 +807,7 @@ void fsendfile(){
             if(id == str.id){
                 m = 1;
                 p.id = id;
-                std::cout<< '\n' << "要发送的文件:(输入“退出退出退出”离开此界面)";
+                std::cout<< '\n' << "要发送的文件(路径):(输入“退出退出退出”离开此界面)";
                 std::getline(std::cin,p.filename);
                 while (!std::filesystem::exists(p.filename)){
                     if(p.filename == "退出退出退出")
@@ -891,16 +847,7 @@ void fsendfile(){
             }
             std::cout  << '\n'<<file_stat.st_size << '|'<< offset;
             std::cout << std::endl;
-            close(file);    /*
-            json_str = shou();
-            //t = from_json<yesorno>(json_str);
-            j = json::parse(json_str);
-            tt.state = j["1"].get<int>();
-            if(tt.state == STATE_YES)
-                std::cout << "发送成功!" << std::endl;
-            else if(tt.state == STATE_NO)
-                std::cout << "发送失败!" <<std::endl;
-                */
+            close(file);    
         }
         else
             std::cout << '\n' << "他不是你的好友!";
@@ -1405,7 +1352,7 @@ void gsendfile(){
             if(gid == str.gid){
                 m = 1;
                 p.gid = gid;
-                std::cout<< '\n' << "要发送的文件:(输入“退出退出退出”离开此界面)";
+                std::cout<< '\n' << "要发送的文件(路径):(输入“退出退出退出”离开此界面)";
                 std::getline(std::cin,p.filename);
                 while (!std::filesystem::exists(p.filename)){
                     if(p.filename == "退出退出退出")
@@ -1444,15 +1391,7 @@ void gsendfile(){
                  std::cout << "\33[2K\r" << p.filename << ": " << (int)(((float)offset / file_stat.st_size) * 100) << "%" << std::flush;
             }
             std::cout << std::endl;
-            close(file);    /*
-            json_str = shou();
-            //t = from_json<yesorno>(json_str);
-            j = json::parse(json_str);
-            tt.state = j["1"].get<int>();
-            if(tt.state == STATE_YES)
-                std::cout << "发送成功!" << std::endl;
-            else if(tt.state == STATE_NO)
-                std::cout << "发送失败!" <<std::endl;*/
+            close(file);    
         }
         else
             std::cout << '\n' << "你不在该群!";

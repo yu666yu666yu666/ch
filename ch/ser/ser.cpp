@@ -15,10 +15,6 @@ void th1(int fd){
 }
 
 void run(std::string json_str,int client){
-    //char a = json_str[json_str.find(':')+1];
-    //char b = json_str[json_str.find(':')+2];
-    //std::string sstate = {json_str[json_str.find(':')+1],json_str[json_str.find(':')+2]};
-    //int state = std::stoi(sstate);
     std::cout << "处理" << std::endl;
     int state;
     std::size_t colon_pos = json_str.find(':');
@@ -424,22 +420,7 @@ void logons(std::string json_str,int client){
                     j = {{"1", t.state}};
                     jsonstr = j.dump();
                     fa(jsonstr,client);
-                    /*
-                    std::string unid = "un" + p.cid;
-                    reply1 = (redisReply*)redisCommand(rediss, "GET %s ", unid.c_str());
-                    jsonstr = reply1->str;
-                    j = json::parse(jsonstr);
-                    un.un = j["1"].get<std::vector<json>>();
-                    std::cout <<pp.fd2<<std::endl;
-                    for(const auto& u : un.un){
-                        jsonstr = u.dump();
-                        fa(jsonstr,pp.fd2);
-                    }
-                    un.un.clear();
-                    j = {{"1", un.un}};
-                    jsonstr = j.dump();
-                    reply = (redisReply*)redisCommand(rediss, "SET %s %s", unid.c_str(), jsonstr.c_str());
-                    */
+
                 }
                 else{
                     t.state = STATE_NO;
@@ -500,21 +481,7 @@ void forget1s(std::string json_str,int client){
                     j = {{"1", t.state}};
                     jsonstr = j.dump();
                     fa(jsonstr,client);
-                    /*
-                    std::string unid = "un" + p.cid;
-                    reply1 = (redisReply*)redisCommand(rediss, "GET %s ", unid.c_str());
-                    jsonstr = reply1->str;
-                    j = json::parse(jsonstr);
-                    un.un = j["1"].get<std::vector<json>>();
-                    for(const auto& u : un.un){
-                        jsonstr = u.dump();
-                        fa(jsonstr,pp.fd2);
-                    }
-                    un.un.clear();
-                    j = {{"1", un.un}};
-                    jsonstr = j.dump();
-                    reply = (redisReply*)redisCommand(rediss, "SET %s %s", unid.c_str(), jsonstr.c_str());
-                    */
+                
                 }
                 else{
                     t.state = STATE_NO;

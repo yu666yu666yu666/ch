@@ -26,8 +26,9 @@
 #include <hiredis/hiredis.h>
 #include <csignal>
 #include <cstring>
-//#include "nlohmann/json.hpp"
-#include "/home/yu666/Desktop/ch/json/single_include/nlohmann/json.hpp" 
+//#include <nlohmann/json.hpp>
+//#include "/home/yu666/Desktop/ch/json/single_include/nlohmann/json.hpp" 
+#include "./json.hpp"
 using json = nlohmann::json;
 
 #define SERVER_PORT 8888
@@ -147,7 +148,6 @@ void addmanager();
 void delmanager();
 void examine();
 void delmember();
-
 struct pregister1{
     int state;
     std::string cid;
