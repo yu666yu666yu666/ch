@@ -139,7 +139,7 @@ void frecvfile(){
                 std::filesystem::path dirpath = "../client/";
                 if (!std::filesystem::exists(dirpath)){
                     std::filesystem::create_directories(dirpath);
-                    std::cout << "Directory created successfully" << std::endl;
+                    std::cout << "正在创建文件" << std::endl;
                 }
                 else
                     std::cout << "Directory exists" << std::endl;
@@ -161,13 +161,13 @@ void frecvfile(){
                     }
                     fwrite(buffer, 1, len, fp);
                     total_received += len;   
-                    std::cout << "\33[2K\r" << filename << ": " << (int)(((float)total_received / tt.filesize) * 100) << "%" << std::flush;              
+                    std::cout  << filename << ": " << (int)(((float)total_received / tt.filesize) * 100) << "%" << std::flush;              
                 }
                 std::cout << std::endl;
                 fclose(fp);
                 std::cout << total_received << std::endl;
                 if (total_received == tt.filesize){
-                    std::cout << "File received successfully" << std::endl;
+                    std::cout << "接收成功" << std::endl;
                 }
                 else
                     std::cerr << "File size mismatch" << std::endl;
@@ -256,7 +256,7 @@ void gsendfile(){
                     std::cerr <<"sendfile err" << '\n';
                     break;
                 }
-                 std::cout << "\33[2K\r" << p.filename << ": " << (int)(((float)offset / file_stat.st_size) * 100) << "%" << std::flush;
+                 std::cout << p.filename << ": " << (int)(((float)offset / file_stat.st_size) * 100) << "%" << std::flush;
             }
             std::cout << std::endl;
             close(file);    
@@ -315,11 +315,8 @@ void grecvfile(){
                 std::filesystem::path dirpath = "../client/";
                 if (!std::filesystem::exists(dirpath)){
                     std::filesystem::create_directories(dirpath);
-                    std::cout << "Directory created successfully" << std::endl;
+                    std::cout << "正在创建文件" << std::endl;
                 }
-                else
-                    std::cout << "Directory exists" << std::endl;
-                    
                 filename1 = dirpath.c_str() + filename;
                 FILE *fp = fopen(filename1.c_str(), "wb");
                 if (fp == nullptr) 
@@ -343,7 +340,7 @@ void grecvfile(){
                 fclose(fp);
                 std::cout << total_received << std::endl;
                 if (total_received == tt.filesize){
-                    std::cout << "File received successfully" << std::endl;
+                    std::cout << "接收成功" << std::endl;
                 }
                 else
                     std::cerr << "File size mismatch" << std::endl;
