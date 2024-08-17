@@ -35,7 +35,9 @@ void fsendfile1s(std::string json_str,int client){
    
     while (off < p.filesize){
         len = recv(client, buffer, sizeof(buffer), 0);
-        if (len <= 0){
+        if(errno == EAGAIN)
+            continue;
+        if (len < 0){
             if(len < 0)
                 perror("recv");
             return;
@@ -254,9 +256,10 @@ void frecvfile3s(std::string json_str,int client){
                 struct stat file_stat;
                 fstat(file, &file_stat);
                 t.filesize = file_stat.st_size;
-                j = {{"1", t.filesize}};
+                j = {{"1", file_stat.st_size}};
                 jsonstr = j.dump();
                 fa(jsonstr,client);
+                fcntl(client, F_SETFL, fcntl(client, F_GETFD, 0) & ~O_NONBLOCK);
                 sleep(5);
                 off_t off = 0;
                 ssize_t bytes = 0;
@@ -266,7 +269,7 @@ void frecvfile3s(std::string json_str,int client){
                         std::cerr << "Sendfile error: " << strerror(errno) << "\n";
                         break;
                     }
-                    std::cout << "发送: " << bytes << " bytes, 总共: " << off << " bytes\n";
+                    std::cout << "发送: " << bytes << " bytes, 总共: " << file_stat.st_size << " bytes\n";
                     std::cout << p.filename << ": " << (int)(((float)off / file_stat.st_size) * 100) << "%" << std::flush;
                 }
                 std::cout << std::endl;
@@ -292,9 +295,10 @@ void frecvfile3s(std::string json_str,int client){
                 struct stat file_stat;
                 fstat(file, &file_stat);
                 t.filesize = file_stat.st_size;
-                j = {{"1", t.filesize}};
+                j = {{"1", file_stat.st_size}};
                 jsonstr = j.dump();
                 fa(jsonstr,client);
+                fcntl(client, F_SETFL, fcntl(client, F_GETFD, 0) & ~O_NONBLOCK);
                 sleep(5);
                 off_t off = 0;
                 ssize_t bytes = 0;
@@ -304,7 +308,7 @@ void frecvfile3s(std::string json_str,int client){
                         std::cerr << "Sendfile error: " << strerror(errno) << "\n";
                         break;
                     }
-                    std::cout << "发送: " << bytes << " bytes, 总共: " << off << " bytes\n";
+                    std::cout << "发送: " << bytes << " bytes, 总共: " << file_stat.st_size << " bytes\n";
                     std::cout  << p.filename << ": " << (int)(((float)off / file_stat.st_size) * 100) << "%" << std::flush;
                 }
                 std::cout << std::endl;
@@ -344,6 +348,7 @@ void gsendfile1s(std::string json_str,int client){
         std::cerr << "Failed to open file" << std::endl;
         return;
     }
+    fcntl(client, F_SETFL, fcntl(client, F_GETFD, 0) & ~O_NONBLOCK);
     sleep(5);
     int len;
     char buffer[10240];
@@ -351,6 +356,8 @@ void gsendfile1s(std::string json_str,int client){
 
     while (off < p.filesize){
         len = recv(client, buffer, sizeof(buffer), 0);
+        if(errno == EAGAIN)
+            continue;
         if (len < 0){
             perror("recv");
             return;
@@ -556,6 +563,7 @@ void grecvfile3s(std::string json_str,int client){
                 j = {{"1", t.filesize}};
                 jsonstr = j.dump();
                 fa(jsonstr,client);
+                fcntl(client, F_SETFL, fcntl(client, F_GETFD, 0) & ~O_NONBLOCK);
                 sleep(5);
                 off_t off = 0;
                 ssize_t bytes = 0;

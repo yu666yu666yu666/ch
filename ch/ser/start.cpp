@@ -23,31 +23,6 @@ void run(std::string json_str,int client){
         state = std::stoi(sstate);
     }
     std::cout << "具体操作:" << state << std::endl;
-
-    if(state == STATE_EXIT1){
-        exit1s(json_str,client);
-        std::cout << "完成一次操作" << std::endl;
-        return;
-    }
-
-    if(state == STATE_EXIT2){
-        exit2s(json_str,client);
-        std::cout << "完成一次操作" << std::endl;
-        return;
-    }
-    struct epoll_event event;
-    event.data.fd = client;
-    event.events = EPOLLIN | EPOLLET;
-
-    fcntl(client, F_SETFL, fcntl(client, F_GETFD, 0) | O_NONBLOCK);
-
-    if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client, &event) < 0) {
-        perror("epoll_ctl");
-        close(client);
-    }
-    else
-        std::cout << "readd ok"<<std::endl;
-
     switch (state)
     {
     case STATE_TOOCLIENT1: tooclient1s(json_str,client);break;
@@ -90,8 +65,25 @@ void run(std::string json_str,int client){
     case STATE_EXIT2: exit2s(json_str,client);break;
     default:break;
     }
+    if(state == STATE_EXIT1||state == STATE_EXIT2){
+        std::cout << "完成一次操作" << std::endl;
+        return;
+    }
+    struct epoll_event event;
     
     std::cout << "完成一次操作" << std::endl;
+
+    event.data.fd = client;
+    event.events = EPOLLIN | EPOLLET;
+
+    fcntl(client, F_SETFL, fcntl(client, F_GETFD, 0) | O_NONBLOCK);
+
+    if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client, &event) < 0) {
+        perror("epoll_ctl");
+        close(client);
+    }
+    else
+        std::cout << "readd ok"<<std::endl;
 }
 
 void fa(std::string jsonstr,int client){
