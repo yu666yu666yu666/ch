@@ -38,6 +38,7 @@ using json = nlohmann::json;
 #define MAX_EVENTS 1024
 #define BUFFER_SIZE 1024
 #define IP "10.30.0.118"
+//#define IP "127.0.0.1"
 
 redisContext* rediss;
 int epoll_fd;
@@ -153,6 +154,9 @@ void delmember1s(std::string,int);
 void exit1s(std::string,int);
 void exit2s(std::string,int);
 
+struct header{
+    int length;
+};
 struct pregister1{
     int state;
     std::string cid;

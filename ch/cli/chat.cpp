@@ -61,9 +61,14 @@ void myclient::fchat(){
                     p.chat = gettime() + "  " + myid + " :" + chat;
                     p.state = STATE_FCHAT1;
                     //json_str = to_json(p);
+                    if(p.chat.length() >= 350){
+                        std::cout << "字数在350内!" <<std::endl;
+                        continue;
+                    }
                     j = {{"1", p.state},{"2", p.cid},{"3", p.id},{"4", p.chat}};
                     json_str = j.dump();
                     fa(json_str);
+                    usleep(50000);
                 }
                 ccid = "退出退出退出!";
                 break;
@@ -82,8 +87,10 @@ void myclient::fhistory(){
     fhistory2 t;
     json j;
     while(1){
-        std::cout << '\n' << "你要查询与谁的聊天记录?输入id:";
+        std::cout << '\n' << "你要查询与谁的聊天记录?输入id(输入“退出退出退出”离开此界面):";
         std::getline(std::cin,id);
+        if(id == "退出退出退出")
+            break;
         p = {STATE_FHISTORY1,myid,id};
         if(id == myid){
             std::cout << '\n' << "你不能查看和自己的聊天记录!";
@@ -171,9 +178,14 @@ void myclient::gchat(){
                     p.gid = gid;
                     p.gchat = gettime() + "  " + myid + " :" + gchat;
                     //json_str = to_json(p);
+                    if(p.gchat.length() >= 350){
+                        std::cout << "字数在350内!" <<std::endl;
+                        continue;
+                    }
                     j = {{"1", p.state},{"2", p.cid},{"3", p.gid},{"4", p.gchat}};
                     json_str = j.dump();
                     fa(json_str);
+                    usleep(50000);
                 }
                 ggid = "退出退出退出!";
                 break;
@@ -192,8 +204,10 @@ void myclient::ghistory(){
     ghistory2 t;
     json j;
     while(1){
-        std::cout << '\n' << "你要查询哪个群的聊天记录?输入gid:";
+        std::cout << '\n' << "你要查询哪个群的聊天记录?输入gid:(输入“退出退出退出”离开此界面)";
         std::getline(std::cin,gid);
+        if(gid == "退出退出退出")
+            break;
         p = {STATE_GHISTORY1,myid,gid};
         //json_str = to_json(p);
         j = {{"1", p.state},{"2", p.cid},{"3", p.gid}};

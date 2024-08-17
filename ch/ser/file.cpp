@@ -27,6 +27,7 @@ void fsendfile1s(std::string json_str,int client){
         std::cerr << "Failed to open file" << std::endl;
         return;
     }
+    fcntl(client, F_SETFL, fcntl(client, F_GETFD, 0) & ~O_NONBLOCK);
     sleep(5);
     int len;
     char buffer[10240];

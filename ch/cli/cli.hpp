@@ -159,13 +159,8 @@ private :
     void examine();
     void delmember();
 };
-
-class flist11{
-public:
-    void filst11();
-private:
-    int state;
-    std::string cid;
+struct header{
+    int length;
 };
 struct pregister1{
     int state;
